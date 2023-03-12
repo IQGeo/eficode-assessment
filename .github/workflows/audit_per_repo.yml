@@ -105,7 +105,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Run script
         run: |
-          ./Visibility_Audit/visibility_audit.sh
+          ./Visibility_Audit/visibility_audit_json.sh
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
           ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
