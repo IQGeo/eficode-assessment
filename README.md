@@ -22,5 +22,5 @@ According to the [official documentation](https://docs.github.com/en/early-acces
 - [ ] Packages in GitHub Packages
 - [x] GitHub Apps
 - [x] User access to the repository
-- [ ] Repository visibility  
+- [x] Repository visibility  
 - [ ] Some branch protection rules
