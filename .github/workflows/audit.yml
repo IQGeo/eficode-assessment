@@ -120,3 +120,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+  apps-audit:
+    name: GitHub Apps Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v2
+      - name: Run script
+        run: |
+          ./Apps_Audit/apps_audit.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
