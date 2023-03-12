@@ -6,6 +6,7 @@ on:
       org-name:
         description: "Please provide an org name"
         required: true
+        default: "sparlant-demo-org"
     
 env:
   PAT: ${{ secrets.PAT }}
