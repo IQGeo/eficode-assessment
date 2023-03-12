@@ -66,7 +66,7 @@ jobs:
       - name: Run script
         id: secrets-output
         run: |
-          ./Secrets_Audit/secrets_audit.sh
+          ./Secrets_Audit/secrets_audit_json.sh
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
           ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
