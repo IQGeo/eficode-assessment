@@ -1,4 +1,3 @@
-
 jq '.[] | select(.secret_type=="Actions Secrets")' secrets.json | jq '[ .repos[] | { repo: .repo, actions_secret: .secrets }  ]' > actions_secrets.json
 jq '.[] | select(.secret_type=="Dependabot Secrets")' secrets.json | jq '[ .repos[] | { repo: .repo, dependabot_secret: .secrets }  ]' > dependabot_secrets.json
 jq '.[] | select(.secret_type=="Codespaces Secrets")' secrets.json | jq '[ .repos[] | { repo: .repo, codespaces_secret: .secrets }  ]' > codespaces_secrets.json
@@ -11,4 +10,7 @@ jq '.[] | select(.secret_type=="Codespaces Secrets")' secrets.json | jq '[ .org 
 
 jq '[ [ .[] | { org: "sparlant-demo-org", id: .id, app_slug: .app_slug }  ] | group_by(.org)[]  | {org: (.[0].org), apps: [.[] | { id: .id, app_slud: .app_slug } ]} ]' apps.json > org_apps.json
 
-jq -s 'add' org_actions_secrets.json org_dependabot_secrets.json org_codespaces_secrets.json org_apps.json | jq ' group_by(.org)  | map(add)'
+jq -s 'add' org_actions_secrets.json org_dependabot_secrets.json org_codespaces_secrets.json org_apps.json | jq ' group_by(.org)  | map(add)' > org.json
+
+gh issue comment $ISSUE_URL --body-file org.json
+gh issue comment $ISSUE_URL --body-file repositories.json

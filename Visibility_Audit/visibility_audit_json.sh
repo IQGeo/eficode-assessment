@@ -4,3 +4,4 @@ RESULT_VISIBILITY=$REPOS
 
 gh issue comment $ISSUE_URL --body "$RESULT_VISIBILITY"
 
+echo $RESULT_VISIBILITY > visibility.json

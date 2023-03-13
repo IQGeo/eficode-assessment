@@ -31,8 +31,6 @@ jobs:
     name: LFS Audit
     runs-on: ubuntu-latest
     needs: [create-issue]
-    outputs:
-      LFS_OUTPUT: ${{ steps.lfs-output.outputs.LFS_OUTPUT }}
     steps:
       - name: Checkout files
         uses: actions/checkout@v2
@@ -49,17 +47,19 @@ jobs:
 
           gh issue comment $ISSUE_URL --body "$RESULT"
 
-          echo "LFS_OUTPUT=$RESULT" >> "$GITHUB_OUTPUT"
+          echo $RESULT > lfs.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: lfs
+          path: lfs.json
   secrets-audit:
     name: Secrets Audit
     runs-on: ubuntu-latest
     needs: [create-issue]
-    outputs:
-      SECRETS_OUTPUT: ${{ steps.secrets-output.outputs.SECRETS_OUTPUT }}
     steps:
       - name: Checkout files
         uses: actions/checkout@v2
@@ -70,6 +70,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
           ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: secrets
+          path: secrets.json
   apps-audit:
     name: GitHub Apps Audit
     runs-on: ubuntu-latest
@@ -83,6 +87,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
           ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: apps
+          path: apps.json
   permissions-audit:
     name: Permissions Audit
     runs-on: ubuntu-latest
@@ -96,6 +104,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
           ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: permissions
+          path: permissions.json
   visibility-audit:
     name: Visibility Audit
     runs-on: ubuntu-latest
@@ -109,6 +121,46 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
           ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: visibility
+          path: visibility.json  
+  report:
+    name: Report
+    runs-on: ubuntu-latest
+    needs: [create-issue, lfs-audit, visibility-audit, permissions-audit, apps-audit, secrets-audit]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v2
+      - uses: actions/download-artifact@v3
+        with:
+          name: lfs
+      - uses: actions/download-artifact@v3
+        with:
+          name: visibility
+      - uses: actions/download-artifact@v3
+        with:
+          name: permissions
+      - uses: actions/download-artifact@v3
+        with:
+          name: apps
+      - uses: actions/download-artifact@v3
+        with:
+          name: secrets
+      - name: Run script
+        run: |
+          ./report.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: org
+          path: org.json
+      - uses: actions/upload-artifact@v3
+        with:
+          name: repositories
+          path: repositories.json
 
 
           

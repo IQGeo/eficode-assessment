@@ -90,6 +90,6 @@ unset -n secrettypes
 JSON_RESULT=${JSON_RESULT::-1} 
 JSON_RESULT+="]"
 
-echo "SECRETS_OUTPUT=$JSON_RESULT" >> "$GITHUB_OUTPUT"
-
 gh issue comment $ISSUE_URL --body "$JSON_RESULT"
+
+echo $RESULT > secrets.json
