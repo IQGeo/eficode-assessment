@@ -2,7 +2,7 @@ jq '.[] | select(.secret_type=="Actions Secrets")' secrets.json | jq '[ .repos[]
 jq '.[] | select(.secret_type=="Dependabot Secrets")' secrets.json | jq '[ .repos[] | { repo: .repo, dependabot_secret: .secrets }  ]' > dependabot_secrets.json
 jq '.[] | select(.secret_type=="Codespaces Secrets")' secrets.json | jq '[ .repos[] | { repo: .repo, codespaces_secret: .secrets }  ]' > codespaces_secrets.json
 
-jq -s 'add' permissions.json visibility.json actions_secrets.json dependabot_secrets.json codespaces_secrets.json lfs.json environments.json | jq ' group_by(.repo) | map(add) ' > repositories.json
+jq -s 'add' permissions.json visibility.json actions_secrets.json dependabot_secrets.json codespaces_secrets.json lfs.json environments.json protections.json | jq ' group_by(.repo) | map(add) ' > repositories.json
 
 ORG_NAME="$ORG_NAME" jq '.[] | select(.secret_type=="Actions Secrets")' secrets.json | jq '[ .org | { org: env.ORG_NAME, actions_secret: .secrets }  ]' > org_actions_secrets.json
 ORG_NAME="$ORG_NAME" jq '.[] | select(.secret_type=="Dependabot Secrets")' secrets.json | jq '[ .org | { org: env.ORG_NAME, dependabot_secret: .secrets }  ]' > org_dependabot_secrets.json

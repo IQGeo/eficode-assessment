@@ -23,4 +23,4 @@ According to the [official documentation](https://docs.github.com/en/early-acces
 - [x] GitHub Apps
 - [x] User access to the repository
 - [x] Repository visibility  
-- [ ] Some branch protection rules
+- [x] Some branch protection rules
