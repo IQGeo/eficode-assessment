@@ -1,5 +1,3 @@
-ORG_NAME="sparlant-demo-org"
-
 TYPES=(npm maven rubygems docker nuget container)
 
 echo "[]" > packages.json
