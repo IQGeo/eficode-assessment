@@ -2,7 +2,7 @@
 
 ## Visibility
 
-You can use these [REST API Endpoint](https://docs.github.com/en/enterprise-cloud@latest/rest/repos/repos?apiVersion=2022-11-28#update-a-repository) or follow these [steps](https://docs.github.com/en/enterprise-cloud@latest/rest/repos/repos?apiVersion=2022-11-28#update-a-repository).
+You can use these [REST API Endpoint](https://docs.github.com/en/enterprise-cloud@latest/rest/repos/repos?apiVersion=2022-11-28#update-a-repository) or follow these [steps](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility#changing-a-repositorys-visibility).
 
 ## LFS
 
@@ -42,6 +42,8 @@ You can manage:
   - actions secrets by following these [steps](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-organization)
   - codespaces secrets by following these [steps]( https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-encrypted-secrets-for-your-repository-and-organization-for-github-codespaces#adding-secrets-for-an-organization)
   - dependabot secrets by following these [steps](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/configuring-access-to-private-registries-for-dependabot#adding-an-organization-secret-for-dependabot)
+
+You cannot "move" or "copy" a secret from repository from another one. You cannot retrieve the value of a secret. You can only create a new secret and use the current value if you have previously stored it in a secret manager like 1Password7 or KeePass for example.
 
 ## Environments
 
