@@ -39,7 +39,7 @@ declare -A secrettypes2=(
 
 declare -n secrettypes
 
-REPOS=$(gh repo list "$ORG_NAME" --json name --jq '.[].name')
+REPOS=$(gh repo list --limit 500 "$ORG_NAME" --json name --jq '.[].name')
 
 JSON_RESULT="["
 
@@ -70,7 +70,7 @@ for secrettypes in ${!secrettypes@}; do
         JSON_RESULT+='},'
     done <<< "$REPOS"
 
-    JSON_RESULT=${JSON_RESULT::-1} 
+    JSON_RESULT=${JSON_RESULT::-1}
     JSON_RESULT+='],"org":{'
 
     ORG_SECRETS=($(build_org_secrets_list $ORG_NAME "${secrettypes[type]}" | awk '{ print $1 }'))
@@ -85,7 +85,7 @@ for secrettypes in ${!secrettypes@}; do
 done
 unset -n secrettypes
 
-JSON_RESULT=${JSON_RESULT::-1} 
+JSON_RESULT=${JSON_RESULT::-1}
 JSON_RESULT+="]"
 
 echo "$JSON_RESULT" > secrets.json

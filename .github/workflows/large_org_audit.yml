@@ -1,0 +1,335 @@
+name: Large Org Migration assessment
+
+on:
+  workflow_dispatch:
+    inputs:
+      ORG_NAME:
+        description: "Please provide an org name"
+        required: true
+        default: "sarlant-test-org"
+  workflow_call:
+    inputs:
+      ORG_NAME:
+        type: string
+        required: true
+
+env:
+  PAT: ${{ secrets.PAT }}
+
+jobs:
+  create-issue:
+    name: Manage Audit Issue
+    runs-on: ubuntu-latest
+    outputs:
+      ISSUE_URL: ${{ steps.create-issue.outputs.ISSUE_URL }}
+    steps:
+      - name: Delete Previous Issue
+        run: |
+          SEARCH='"Assessment issue - '
+          SEARCH+="$ORG_NAME"
+          SEARCH+='"'
+          ISSUES=$(gh issue list --search "$SEARCH" --json url --repo "$REPO")
+          while read -r issueUrl; do
+            if [ "$issueUrl" != "" ];
+            then
+              gh issue close "$issueUrl"
+            fi
+          done <<< $(jq -c -r '.[].url' <<< "$ISSUES")
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - name: Create Issue
+        id: create-issue
+        run: |
+          ISSUE_URL=$(gh issue create --title "Assessment issue - $ORG_NAME" --body "" --repo $REPO)
+          echo "ISSUE_URL=$ISSUE_URL" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+  lfs-audit:
+    name: LFS Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Build & Run
+        run: |
+          cd LFS_Audit
+          go build .
+          ./LFSAudit audit --org-name="$ORG_NAME" --pat-token="$PAT"
+        env:
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - name: Create JSON
+        id: lfs-output
+        run: |
+          if [ -r ./LFS_Audit/repos_audited.txt ];
+          then
+            RESULT=$(jq --raw-input --slurp 'split("\n") | map(select(. != ""))' LFS_Audit/repos_audited.txt | jq '[ .[] | {"repo":., "lfs": true} ]')
+          else
+            RESULT="[]"
+          fi
+
+          echo $RESULT > lfs.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: lfs-${{ inputs.ORG_NAME }}
+          path: lfs.json
+  secrets-audit:
+    name: Secrets Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        id: secrets-output
+        run: |
+          ./Secrets_Audit/secrets_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: secrets-${{ inputs.ORG_NAME }}
+          path: secrets.json
+  apps-audit:
+    name: GitHub Apps Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          ./Apps_Audit/apps_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: apps-${{ inputs.ORG_NAME }}
+          path: apps.json
+  permissions-audit:
+    name: Permissions Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          ./Permissions_Audit/permissions_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: permissions-${{ inputs.ORG_NAME }}
+          path: permissions.json
+  visibility-audit:
+    name: Visibility Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          ./Visibility_Audit/visibility_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: visibility-${{ inputs.ORG_NAME }}
+          path: visibility.json
+  projects-audit:
+    name: Projects Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          ./Projects_Audit/projects_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: projects-${{ inputs.ORG_NAME }}
+          path: projects.json
+  environments-audit:
+    name: Environments Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          ./Environments_Audit/environments_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: environments-${{ inputs.ORG_NAME }}
+          path: environments.json
+  discussions-audit:
+    name: Discussions Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          ./Discussions_Audit/discussions_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: discussions-${{ inputs.ORG_NAME }}
+          path: discussions.json
+  protections-audit:
+    name: Protections Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          ./Protections_Audit/protections_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: protections-${{ inputs.ORG_NAME }}
+          path: protections.json
+  packages-audit:
+    name: Packages Audit
+    runs-on: ubuntu-latest
+    needs: [create-issue]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          ./Packages_Audit/packages_audit_json.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packages-${{ inputs.ORG_NAME }}
+          path: packages.json
+  report:
+    name: Report
+    runs-on: ubuntu-latest
+    needs: [create-issue, lfs-audit, visibility-audit, permissions-audit, apps-audit, secrets-audit, projects-audit, environments-audit, discussions-audit, protections-audit, packages-audit]
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: lfs-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: visibility-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: permissions-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: apps-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: secrets-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: projects-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: environments-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: protections-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: discussions-${{ inputs.ORG_NAME }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: packages-${{ inputs.ORG_NAME }}
+      - name: Run script
+        run: |
+          ./report.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: org-${{ inputs.ORG_NAME }}
+          path: org.json
+      - uses: actions/upload-artifact@v3
+        with:
+          name: repositories-${{ inputs.ORG_NAME }}
+          path: repositories.json
+      - name: Run script
+        run: |
+          ./json-to-md.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: report-detailled-${{ inputs.ORG_NAME }}
+          path: report.md
+      - name: Run script
+        run: |
+          ./json-to-md-summary.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - name: Add comment (summary report)
+        run: |
+          gh issue edit "$ISSUE_URL" --body-file summary.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: report-${{ inputs.ORG_NAME }}
+          path: summary.md
+      - name: Add instruction
+        run: |
+          gh issue comment "$ISSUE_URL" --body-file instructions.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_URL: ${{needs.create-issue.outputs.ISSUE_URL}}
+          ORG_NAME: ${{ inputs.ORG_NAME }}

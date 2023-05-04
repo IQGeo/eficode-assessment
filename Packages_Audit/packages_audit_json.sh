@@ -9,7 +9,7 @@ do
 	type="$i"
     echo "Auditing type $type ..."
 
-    PACKAGES_RESULT=$(gh api "/orgs/$ORG_NAME/packages?package_type=$type" | TYPE=$type ORG_NAME=$ORG_NAME jq '[{ org: env.ORG_NAME, packages: [ { type: env.TYPE, name: .[].name } ] }]')
+    PACKAGES_RESULT=$(gh api --paginate "/orgs/$ORG_NAME/packages?package_type=$type" | TYPE=$type ORG_NAME=$ORG_NAME jq '[{ org: env.ORG_NAME, packages: [ { type: env.TYPE, name: .[].name } ] }]')
 
     echo "$PACKAGES_RESULT" > type_packages.json
 

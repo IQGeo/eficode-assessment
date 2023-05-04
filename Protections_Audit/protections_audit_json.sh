@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPOS=$(gh repo list "$ORG_NAME" --json name --jq '.[].name')
+REPOS=$(gh repo list --limit 500  "$ORG_NAME" --json name --jq '.[].name')
 
 echo "[]" > protections.json
 

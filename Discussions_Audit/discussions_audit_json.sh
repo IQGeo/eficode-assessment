@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPOS=$(gh repo list "$ORG_NAME" --json name --jq '.[].name')
+REPOS=$(gh repo list --limit 500 "$ORG_NAME" --json name --jq '.[].name')
 
 echo "[]" > discussions.json
 
@@ -10,7 +10,7 @@ while read -r repo ; do
     DISCUSSIONS_RESULT=$(gh api graphql -f query='
       query{
         repository(owner: "'$ORG_NAME'", name: "'$repo'"){
-          discussions(first: 1) { 
+          discussions(first: 1) {
             totalCount
           }
         }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPOS=$(gh api "/orgs/$ORG_NAME/repos" | jq -r '[ .[] | select(.visibility != "private") | { repo: .name, visibility: .visibility } ]')
+REPOS=$(gh api --paginate "/orgs/$ORG_NAME/repos" | jq -r '[ .[] | select(.visibility != "private") | { repo: .name, visibility: .visibility } ]')
 
 RESULT_VISIBILITY=$REPOS
 
