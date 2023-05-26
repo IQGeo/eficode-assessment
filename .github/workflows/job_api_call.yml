@@ -52,3 +52,4 @@ jobs:
             with:
               name: ${{inputs.ARTIFACT_TYPE}}-${{ inputs.ORG_NAME }}
               path: ${{inputs.ARTIFACT_TYPE}}.json
+              retention-days: 1
