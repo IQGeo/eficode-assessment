@@ -75,7 +75,7 @@ jobs:
     needs: [create-issue]
     with:
       ORG_NAME: ${{ inputs.ORG_NAME }}
-      SCRIPT_PATH: ${GITHUB_WORKSPACE}/Apps_Audit/apps_audit_json.sh
+      SCRIPT_PATH: ${GITHUB_WORKSPACE}/scripts/apps.sh
       ARTIFACT_TYPE: apps
       JOB_NAME: get-apps
     secrets: inherit
