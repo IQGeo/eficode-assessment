@@ -37,5 +37,5 @@ PROJECTS_OLD_RESULT=$(gh api graphql --paginate -H X-Github-Next-Global-ID:true 
 
 echo "$PROJECTS_OLD_RESULT" > PROJECTS_OLD_RESULT.json
 echo "$PROJECTS_V2_RESULT" > PROJECTS_V2_RESULT.json
-JSON_RESULT=$(jq -sc 'add' PROJECTS_OLD_RESULT.json PROJECTS_V2_RESULT.json | ORG_NAME="$ORG_NAME" jq '[{ org: env.ORG_NAME, projects: .}]')
+JSON_RESULT=$(jq -sc 'add' PROJECTS_OLD_RESULT.json PROJECTS_V2_RESULT.json | ORG_NAME="$ORG_NAME" jq -c '[{ org: env.ORG_NAME, projects: .}]')
 echo "$JSON_RESULT" > projects.json

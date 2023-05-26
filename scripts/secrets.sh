@@ -13,9 +13,9 @@ build_org_secrets_list() {
   org_name=$1
   secret_type=$2
 
-  REPO_SECRETS=$(gh secret list --app $secret_type --org $org_name)
+  ORG_SECRETS=$(gh secret list --app $secret_type --org $org_name)
 
-  echo "$REPO_SECRETS"
+  echo "$ORG_SECRETS"
 }
 
 declare -A secrettypes0=(
@@ -87,5 +87,6 @@ unset -n secrettypes
 JSON_RESULT=${JSON_RESULT::-1}
 JSON_RESULT+="]"
 
-echo "$JSON_RESULT" > secrets.json
-echo secrets.json
+echo "$JSON_RESULT" > secrets_bloated.json
+jq -r tostring secrets_bloated.json > secrets.json
+rm secrets_bloated.json
