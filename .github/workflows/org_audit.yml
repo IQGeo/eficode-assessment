@@ -106,7 +106,7 @@ jobs:
     needs: [create-issue]
     with:
       ORG_NAME: ${{ inputs.ORG_NAME }}
-      SCRIPT_PATH: ${GITHUB_WORKSPACE}/scripts/repo_projects.sh
+      SCRIPT_PATH: ${GITHUB_WORKSPACE}/scripts/org_projects.sh
       ARTIFACT_TYPE: projects
       JOB_NAME: get-projects
     secrets: inherit
