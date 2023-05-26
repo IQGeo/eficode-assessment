@@ -42,7 +42,7 @@ jobs:
           SEARCH='"Assessment issue - '
           SEARCH+="$ORG_NAME"
           SEARCH+='"'
-          ISSUES=$(gh issue list --search "$SEARCH" --json url --repo "$REPO")
+          ISSUES=$(gh issue list --search "$SEARCH" --json url)
           while read -r issueUrl; do
             if [ "$issueUrl" != "" ]; then
               gh issue close "$issueUrl"
