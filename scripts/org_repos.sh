@@ -1,6 +1,6 @@
 #!/bin/bash
 echo 'starting...'
-REPOS=$(gh api graphql --paginate -f query='query getRepoPlusPlus($endCursor: String = null) {
+REPOS=$(gh api graphql --paginate -H X-Github-Next-Global-ID:true -f query='query getRepoPlusPlus($endCursor: String = null) {
 	organization(login: "'$ORG_NAME'") {
 		repositories(first: 100, after: $endCursor) {
 			totalCount
@@ -35,4 +35,4 @@ REPOS=$(gh api graphql --paginate -f query='query getRepoPlusPlus($endCursor: St
 		nodeCount
 	}
 }
-' --paginate -H X-Github-Next-Global-ID:true --jq '.data.organization.repositories.nodes[]'  | jq -sc  > repos.json)
+' --jq '.data.organization.repositories.nodes[]'  | jq -sc > repos.json)

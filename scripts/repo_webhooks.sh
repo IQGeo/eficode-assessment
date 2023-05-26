@@ -6,7 +6,7 @@ echo "[]" > repoHooks.json
 while read -r repo ; do
     echo "Auditing repository $repo ..."
 
-    REPOHOOKS_RESULT=$(gh api /repos/$ORG_NAME/$repo/hooks | REPO=$repo jq '[{ repo: env.REPO, webhooks: . }]')
+    REPOHOOKS_RESULT=$(gh api -H X-Github-Next-Global-ID:true /repos/$ORG_NAME/$repo/hooks | REPO=$repo jq '[{ repo: env.REPO, webhooks: . }]')
     echo "$REPOHOOKS_RESULT" > repo_hooks.json
 
     cp repoHooks.json tmp.json

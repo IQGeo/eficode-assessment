@@ -12,7 +12,7 @@ while read -r repo ; do
   RESULT_PERMISSIONS+='", "permissions":'
 
 
-  USER_PERMISSIONS=$(gh api --paginate /repos/$ORG_NAME/$repo/collaborators --jq '[ .[] | { login: .login, role_name: .role_name } ]')
+  USER_PERMISSIONS=$(gh api --paginate -H X-Github-Next-Global-ID:true /repos/$ORG_NAME/$repo/collaborators --jq '[ .[] | { login: .login, role_name: .role_name } ]')
 
   RESULT_PERMISSIONS+=$USER_PERMISSIONS
 

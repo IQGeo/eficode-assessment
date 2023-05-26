@@ -6,7 +6,7 @@ echo "[]" > protections.json
 while read -r repo ; do
     echo "Auditing repository $repo ..."
 
-    PROTECTIONS_RESULT=$(gh api graphql -f query='query {
+    PROTECTIONS_RESULT=$(gh api graphql -H X-Github-Next-Global-ID:true -f query='query {
 	      repository(owner: "'$ORG_NAME'", name: "'$repo'") {
           branchProtectionRules(first: 20) {
             nodes {

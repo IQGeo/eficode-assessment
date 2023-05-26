@@ -9,7 +9,7 @@ do
 	type="$i"
     echo "Auditing type $type ..."
 
-    PACKAGES_RESULT=$(gh api --paginate "/orgs/$ORG_NAME/packages?package_type=$type" | TYPE=$type ORG_NAME=$ORG_NAME jq '[{ org: env.ORG_NAME, packages: [ { type: env.TYPE, name: .[].name } ] }]')
+    PACKAGES_RESULT=$(gh api --paginate -H X-Github-Next-Global-ID:true "/orgs/$ORG_NAME/packages?package_type=$type" | TYPE=$type ORG_NAME=$ORG_NAME jq '[{ org: env.ORG_NAME, packages: [ { type: env.TYPE, name: .[].name } ] }]')
 
     echo "$PACKAGES_RESULT" > type_packages.json
 
@@ -18,9 +18,8 @@ do
 
     rm -rf type_packages.json
     rm -rf tmp.json
-
 done
 
 cp packages.json tmp.json
-jq ' [{org: (.[0].org), packages: ([ .[].packages? | .[] | { type: .type, name: .name } ] ) } ]' tmp.json > packages.json
+jq -c ' [{org: (.[0].org), packages: ([ .[].packages? | .[] | { type: .type, name: .name } ] ) } ]' tmp.json > packages.json
 rm -rf tmp.json

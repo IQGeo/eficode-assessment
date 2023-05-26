@@ -6,7 +6,7 @@ echo "[]" > discussions.json
 while read -r repo ; do
     echo "Auditing repository $repo ..."
 
-    DISCUSSIONS_RESULT=$(gh api graphql -f query='
+    DISCUSSIONS_RESULT=$(gh api graphql -f -H X-Github-Next-Global-ID:true query='
       query{
         repository(owner: "'$ORG_NAME'", name: "'$repo'"){
           discussions(first: 1) {

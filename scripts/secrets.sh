@@ -38,7 +38,6 @@ declare -A secrettypes2=(
 )
 
 declare -n secrettypes
-tree
 REPOS=$(jq -r ".[].name" repos.json)
 
 JSON_RESULT="["

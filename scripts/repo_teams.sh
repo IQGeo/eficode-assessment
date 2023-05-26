@@ -6,7 +6,7 @@ echo "[]" > repoTeams.json
 while read -r repo ; do
     echo "Auditing repository $repo ..."
 
-    REPOTEAMS_RESULT=$(gh api /repos/$ORG_NAME/$repo/teams | REPO=$repo jq '[{ repo: env.REPO, teams: [ { name: .[].name } ] }]')
+    REPOTEAMS_RESULT=$(gh api -H X-Github-Next-Global-ID:true /repos/$ORG_NAME/$repo/teams | REPO=$repo jq '[{ repo: env.REPO, teams: [ { name: .[].name } ] }]')
     echo "$REPOTEAMS_RESULT" > repo_teams.json
     
     cp repoTeams.json tmp.json
