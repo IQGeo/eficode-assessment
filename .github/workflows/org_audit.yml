@@ -70,7 +70,7 @@ jobs:
     needs: [create-issue, basic-data]
     with: 
       ORG_NAME: ${{ inputs.ORG_NAME }}
-      SCRIPT_PATH: ${GITHUB_WORKSPACE}/repository/secrets_audit_json.sh
+      SCRIPT_PATH: ${GITHUB_WORKSPACE}/secrets_audit/secrets_audit_json.sh
       ARTIFACT_TYPE: secrets
       JOB_NAME: get-secrets
       DOWNLOAD_ARTIFACT_NAME: repos-${{ inputs.ORG_NAME }}
