@@ -38,32 +38,32 @@ jobs:
           organization: ${{ inputs.ORG_NAME }}
 
      
-      - name: Delete Previous Issue
-        run: |
-          SEARCH='"Assessment issue - '
-          SEARCH+="$ORG_NAME"
-          SEARCH+='"'
-          ISSUES=$(gh issue list --search "$SEARCH" --json url --repo "$REPO")
-          while read -r issueUrl; do
-            if [ "$issueUrl" != "" ];
-            then
-              gh issue close "$issueUrl"
-            fi
-          done <<< $(jq -c -r '.[].url' <<< "$ISSUES")
-        env:
-          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
-          REPO: ${{ github.repository }}
-          ORG_NAME: ${{ inputs.ORG_NAME }}
+      # - name: Delete Previous Issue
+      #   run: |
+      #     SEARCH='"Assessment issue - '
+      #     SEARCH+="$ORG_NAME"
+      #     SEARCH+='"'
+      #     ISSUES=$(gh issue list --search "$SEARCH" --json url --repo "$REPO")
+      #     while read -r issueUrl; do
+      #       if [ "$issueUrl" != "" ];
+      #       then
+      #         gh issue close "$issueUrl"
+      #       fi
+      #     done <<< $(jq -c -r '.[].url' <<< "$ISSUES")
+      #   env:
+      #     GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+      #     REPO: ${{ github.repository }}
+      #     ORG_NAME: ${{ inputs.ORG_NAME }}
             
-      - name: Create Issue
-        id: create-issue
-        run: |
-          ISSUE_URL=$(gh issue create --title "Assessment issue - $ORG_NAME" --body "" --repo $REPO)
-          echo "ISSUE_URL=$ISSUE_URL" >> "$GITHUB_OUTPUT"
-        env:
-          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
-          REPO: ${{ github.repository }}
-          ORG_NAME: ${{ inputs.ORG_NAME }}
+      # - name: Create Issue
+      #   id: create-issue
+      #   run: |
+      #     ISSUE_URL=$(gh issue create --title "Assessment issue - $ORG_NAME" --body "" --repo $REPO)
+      #     echo "ISSUE_URL=$ISSUE_URL" >> "$GITHUB_OUTPUT"
+      #   env:
+      #     GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+      #     REPO: ${{ github.repository }}
+      #     ORG_NAME: ${{ inputs.ORG_NAME }}
 
   secret-audit:
     uses: ./.github/workflows/job_api_call.yml
