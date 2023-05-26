@@ -1,26 +1,35 @@
 #!/bin/bash
 
-PROJECTS_V2_RESULT=$(gh api graphql -f query='
-  query{
+PROJECTS_V2_RESULT=$(gh api graphql --paginate -f query='
+  query getProjectsV2($endCursor: String = null){
     organization(login: "'$ORG_NAME'"){
-      projectsV2(first: 100) { 
+      projectsV2(first: 100, after: $endCursor) { 
         nodes {
           id
           title
         }
+        pageInfo {
+				  hasNextPage
+				  endCursor
+			  }
       }
+
     }
   }' | jq '{ projectsV2: [ .data.organization.projectsV2.nodes[] ] }'
 )
 
-PROJECTS_OLD_RESULT=$(gh api graphql -f query='
-  query{
+PROJECTS_OLD_RESULT=$(gh api graphql --paginate -f query='
+  query getProjectsOld($endCursor: String = null){
     organization(login: "'$ORG_NAME'"){
-      projects(first: 100) { 
+      projects(first: 100, after: $endCursor) { 
         nodes {
           id
           name
         }
+        pageInfo {
+			  	hasNextPage
+				  endCursor
+			  }
       }
     }
   }' | jq '{ projectsOld: [ .data.organization.projects.nodes[] ] }'
