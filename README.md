@@ -1,4 +1,4 @@
-# GEI Audit
+# EMU Assessment
 
 GitHub Action to audit an organization before running `gh gei`.
 
@@ -17,7 +17,9 @@ According to the [official documentation](https://docs.github.com/en/early-acces
     - [x] Codespaces
     - [x] Actions
 - [x] GitHub Actions Environments
-- [ ] Webhook secrets
+- [x] Webhooks
+- [x] Forked repositories
+- [x] Environments
 - [x] Projects (classic) at the organization level
 - [x] Any Projects (the new projects experience)
 - [x] Discussions at the repository level
@@ -25,19 +27,13 @@ According to the [official documentation](https://docs.github.com/en/early-acces
 - [x] GitHub Apps
 - [x] User access to the repository
 - [x] Repository visibility  
-- [x] Some branch protection rules
+- [x] branch protection rules
 
 ## How to use it?
 
-You have to create a personnal access token with this scope:
-- `codespace:secrets`
-- `read:discussion`
-- `admin:org`
-- `read:packages`
-- `read:project`
-- `repo`
+TODO: describe how to use the GitHub app 'emu-assessment'
 
-Then, you have to store the value in a GitHub Actions Secret called `PAT`.  
+Then, you have to store the application ID and private key in a GitHub Actions Secret called APPLICATION_ID and APPLICATION_PRIVATE_KEY  
 
 Finally, you can manually trigger:
 - the workflow called `Org Migration assessment` and give the name of the org that you want to assess
