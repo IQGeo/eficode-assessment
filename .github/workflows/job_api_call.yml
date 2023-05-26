@@ -43,8 +43,6 @@ jobs:
           - name: Execute Script
             id: execute_script
             run: |
-                ls -l
-                tree 
                 bash ${{ inputs.SCRIPT_PATH }}
             env:
               GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
