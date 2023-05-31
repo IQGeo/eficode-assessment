@@ -85,7 +85,7 @@ jobs:
     needs: [create-issue]
     with:
       ORG_NAME: ${{ inputs.ORG_NAME }}
-      SCRIPT_PATH: ${GITHUB_WORKSPACE}/scripts/repo_github_actions.sh 
+      SCRIPT_PATH: ${GITHUB_WORKSPACE}/scripts/repo_actions.sh 
       ARTIFACT_TYPE: actions
       JOB_NAME: get-actions
     secrets: inherit
@@ -108,6 +108,17 @@ jobs:
       SCRIPT_PATH: ${GITHUB_WORKSPACE}/scripts/repo_permissions.sh
       ARTIFACT_TYPE: permissions
       JOB_NAME: get-permissions
+      DOWNLOAD_ARTIFACT_NAME: repos-${{ inputs.ORG_NAME }}
+    secrets: inherit
+
+  actions-last-run-audit:
+    uses: ./.github/workflows/job_api_call.yml
+    needs: [create-issue, basic-data]
+    with:
+      ORG_NAME: ${{ inputs.ORG_NAME }}
+      SCRIPT_PATH: ${GITHUB_WORKSPACE}/scripts/repo_actions_last_run.sh
+      ARTIFACT_TYPE: actions_workflows_last_run
+      JOB_NAME: get-actions-last-run
       DOWNLOAD_ARTIFACT_NAME: repos-${{ inputs.ORG_NAME }}
     secrets: inherit
 
