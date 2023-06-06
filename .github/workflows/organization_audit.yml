@@ -1,4 +1,4 @@
-name: Org Migration assessment with Composite Actions
+name: Organization assessment
 
 on:
   workflow_dispatch:
