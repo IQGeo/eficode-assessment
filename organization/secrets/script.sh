@@ -16,7 +16,7 @@ build_org_secrets_list() {
   org_name=$1
   secret_type=$2
 
-  ORG_SECRETS=$(gh secret list --app $secret_type --org $org_name)
+  ORG_SECRETS=$(gh secret list --app $secret_type --org ${1})
 
   echo "$ORG_SECRETS"
 }
@@ -41,7 +41,11 @@ declare -A secrettypes2=(
 )
 
 declare -n secrettypes
-REPOS=$(jq -r ".[].name" repos.json)
+
+# create ../../reports if it doesn't exist
+mkdir -p ../../reports
+
+REPOS=$(jq -r ".[].name" ../../reports/repos.json)
 
 JSON_RESULT="["
 
@@ -54,7 +58,6 @@ for secrettypes in ${!secrettypes@}; do
     JSON_RESULT+='",'
     JSON_RESULT+='"repos":['
 
-
     while read -r repo ; do
         echo "Auditing repository $repo ..."
 
@@ -62,7 +65,7 @@ for secrettypes in ${!secrettypes@}; do
         JSON_RESULT+="$repo"
         JSON_RESULT+='"'
 
-        REPO_SECRETS=($(build_repo_secrets_list $ORG_NAME/$repo "${secrettypes[type]}" | awk '{ print $1 }'))
+        REPO_SECRETS=($(build_repo_secrets_list ${1}/$repo "${secrettypes[type]}" | awk '{ print $1 }'))
 
         if [ "$REPO_SECRETS" != "" ]; then
             JSON_RESULT+=',"secrets":'
@@ -75,7 +78,7 @@ for secrettypes in ${!secrettypes@}; do
     JSON_RESULT=${JSON_RESULT::-1}
     JSON_RESULT+='],"org":{'
 
-    ORG_SECRETS=($(build_org_secrets_list $ORG_NAME "${secrettypes[type]}" | awk '{ print $1 }'))
+    ORG_SECRETS=($(build_org_secrets_list ${1} "${secrettypes[type]}" | awk '{ print $1 }'))
     if [ "$ORG_SECRETS" != "" ]; then
         JSON_RESULT+='"secrets":'
         ORG_JSON_RESULT=$(jq -n '$ARGS.positional' --args "${ORG_SECRETS[@]}")
@@ -91,5 +94,5 @@ JSON_RESULT=${JSON_RESULT::-1}
 JSON_RESULT+="]"
 
 echo "$JSON_RESULT" > secrets_bloated.json
-jq -r tostring secrets_bloated.json > secrets.json
+jq -r tostring secrets_bloated.json > ../../reports/secrets.json
 rm secrets_bloated.json

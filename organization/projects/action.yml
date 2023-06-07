@@ -1,0 +1,14 @@
+name: 'Organization GitHub Projects'
+description: 'Get Organization GitHub Projects'
+
+inputs:
+  org:
+    description: 'Organization name'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./script.sh ${{ inputs.org }}
+      shell: bash
+      working-directory: ./organization/projects

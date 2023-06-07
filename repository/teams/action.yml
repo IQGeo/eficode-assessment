@@ -1,0 +1,14 @@
+name: 'Repository Teams'
+description: 'Get repository teams'
+
+inputs:
+  org:
+    description: 'Organization name'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./script.sh ${{ inputs.org }}
+      shell: bash
+      working-directory: ./repository/teams

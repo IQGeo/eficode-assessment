@@ -1,0 +1,14 @@
+name: 'Organization GitHub Packages'
+description: 'Get Organization GitHub Packages'
+
+inputs:
+  org:
+    description: 'Organization name'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./script.sh ${{ inputs.org }}
+      shell: bash
+      working-directory: ./organization/packages

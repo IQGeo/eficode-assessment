@@ -2,17 +2,19 @@
 
 set -eo pipefail
 
-echo "[]" > actions_workflows_last_run.json
+# create ../../reports if it doesn't exist
+mkdir -p ../../reports
+echo "[]" > actions-history.json
 
-REPOS=$(jq -r ".[].name" repos.json)
+REPOS=$(jq -r ".[].name" ../../reports/repos.json)
 
 while read -r repo ; do
     echo "Auditing repository $repo ..."
     # Set the repository owner and name
-    owner="SolidifyDemo"
+    owner=${1}
 
     # Get the list of workflow IDs
-    workflow_ids=$(gh api -H X-Github-Next-Global-ID:true /repos/$owner/$repo/actions/workflows | jq -r '.workflows[].id'  )
+    workflow_ids=$(gh api --paginate -H X-Github-Next-Global-ID:true /repos/$owner/$repo/actions/workflows | jq -r '.workflows[].id'  )
 
     if [ -z "$workflow_ids" ]; then
         echo "No workflows found for $repo"
@@ -38,8 +40,8 @@ while read -r repo ; do
     # Output the results as a JSON document
     runs="${runs%?}"
     echo "[$runs]" | REPO=$repo jq -r '[{name: env.REPO, workflows: .}]' > workflows_last_run.json
-    
-    cp actions_workflows_last_run.json tmp.json
-    jq -sc add workflows_last_run.json tmp.json > actions_workflows_last_run.json
+
+    cp actions-history.json tmp.json
+    jq -sc add workflows_last_run.json tmp.json > ../../reports/actions-history.json
     rm -rf tmp.json workflows_last_run.json
 done <<< "$REPOS"

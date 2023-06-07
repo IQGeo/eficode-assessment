@@ -1,13 +1,18 @@
-name: Cleanup Workflows
-on: [workflow_dispatch]
+name: Cleanup Workflow Runs
+
+on:
+  workflow_dispatch:
+
 jobs:
   do:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      actions: write
+
     steps:
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@1544db1aad28a3bad01a5e942f7370f65fd46e52
-        with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 0
-          keep_minimum_runs: 0
+      - name: Cleanup Workflow Runs
+        run: gh run list --json databaseId --jq '.[].databaseId' | xargs -n1 -I % gh run delete %
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

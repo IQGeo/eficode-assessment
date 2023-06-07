@@ -1,0 +1,14 @@
+name: 'Organization GitHub Actions'
+description: 'Get Organization GitHub Actions'
+
+inputs:
+  org:
+    description: 'Organization name'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./script.sh ${{ inputs.org }}
+      shell: bash
+      working-directory: ./organization/actions

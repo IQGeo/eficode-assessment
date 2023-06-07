@@ -36,8 +36,8 @@ TODO: describe how to use the GitHub app 'emu-assessment'
 Then, you have to store the application ID and private key in a GitHub Actions Secret called APPLICATION_ID and APPLICATION_PRIVATE_KEY  
 
 Finally, you can manually trigger:
-- the workflow called `Org Migration assessment` and give the name of the org that you want to assess
-- the workflow called `MultiOrg Migration assessment` and give a list of org names that you want to assess
+- the workflow called `Organization assessment` and give the name of the org that you want to assess
+- the workflow called `Multi organization assessment` and give a list of organization names that you want to assess
 
 ## Result
 
