@@ -126,5 +126,5 @@ jobs:
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         with:
           name: ${{ matrix.org }}-reports
-          path: reports/**/*.json
+          path: reports/
           retention-days: 1
