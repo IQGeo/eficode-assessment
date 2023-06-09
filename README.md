@@ -1,6 +1,7 @@
 # GHEC Migration Audit
 
-This README provides instructions on how audit organizations and repositories for migration with GEI, in order to assess the data not migrated. The output of this audit is a series of json files with all the data point that you would need to apply post migration. The data points are: 
+This repository consist of all the relevant bash scripts, packaged as composite action for each data point and an example workflow optimized for scale on how to consume these. This README provides instructions on how audit organizations and repositories for migration with GEI, in order to assess the data not migrated. The output of this audit is a series of json files with all the data point that you would need to apply post migration. The data points are: 
+
 - Organization
   - actions
   - GitHub Apps
@@ -18,9 +19,11 @@ This README provides instructions on how audit organizations and repositories fo
   - users
   - webhooks
 
+Note that currently we can not retrieve containers from the packages endpoint with a GitHub App.
+
 For more information regarding which data is or is not migrated, see [GitHub.com migration support](https://docs.github.com/en/migrations/using-github-enterprise-importer/understanding-github-enterprise-importer/migration-support-for-github-enterprise-importer#githubcom-migration-support). 
 
-This repository consist of all the relevant bash scripts, packaged as composite action for each data point and an example workflow optimized for scale on how to consume these
+
 
 
 
