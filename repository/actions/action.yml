@@ -1,0 +1,17 @@
+name: "Repository GitHub Actions"
+description: "Get Repository GitHub Actions"
+
+inputs:
+  org:
+    description: "Organization name"
+    required: true
+  repositories:
+    description: "Path to json file with repositories to query"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./script.sh ${{ inputs.org }} ${{ inputs.repositories }}
+      shell: bash
+      working-directory: ./repository/actions/

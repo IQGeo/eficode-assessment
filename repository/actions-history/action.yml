@@ -1,0 +1,17 @@
+name: "Organization GitHub Actions History"
+description: "Get Organization GitHub Actions History"
+
+inputs:
+  org:
+    description: "Organization name"
+    required: true
+  repositories:
+    description: "Path to json file with repositories to query"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./script.sh ${{ inputs.org }} ${{ inputs.repositories }}
+      shell: bash
+      working-directory: ./organization/actions-history

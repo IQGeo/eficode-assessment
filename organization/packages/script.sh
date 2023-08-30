@@ -6,24 +6,30 @@ set -eo pipefail
 mkdir -p ../../reports
 
 TYPES=(npm maven rubygems docker nuget)
+echo "[]" >packages.json
 
-echo "[]" > packages.json
+for i in "${TYPES[@]}"; do
+  type="$i"
+  echo "Auditing type $type ..."
 
-for i in "${TYPES[@]}"
-do
-	type="$i"
-    echo "Auditing type $type ..."
+  PACKAGES_RESULT=$(gh api --paginate -H X-Github-Next-Global-ID:true "/orgs/${1}/packages?package_type=$type")
+  echo $PACKAGES_RESULT | jq "[{ org: .[].owner.login, packages: [ { type: .[].package_type, name: .[].name, repository_name: .[].repository.name, repository_full_name: .[].repository.full_name } ] }]" \
+    >type_packages.json
 
-    PACKAGES_RESULT=$(gh api --paginate -H X-Github-Next-Global-ID:true "/orgs/${1}/packages?package_type=$type" | TYPE=$type ORG_NAME=${1} jq '[{ org: env.ORG_NAME, packages: [ { type: env.TYPE, name: .[].name } ] }]')
-
-    echo "$PACKAGES_RESULT" > type_packages.json
-
-    cp packages.json tmp.json
-
-    jq -sc add tmp.json type_packages.json  > packages.json
-
-    rm -rf type_packages.json
-    rm -rf tmp.json
+  cp packages.json tmp.json
+  jq -sc add tmp.json type_packages.json >packages.json
+  rm -rf type_packages.json, tmp.json
 done
 
-jq -c ' [{org: (.[0].org), packages: ([ .[].packages? | .[] | { type: .type, name: .name } ] ) } ]' packages.json > ../../reports/packages.json
+jq -c ' [{org: (.[0].org), packages: ([ .[].packages? | .[] | { type: .type, name: .name, repository_name: .repository_name, repository_full_name: .repository_full_name  } ] ) } ]' packages.json >../../reports/packages.json
+
+# Group by repository full name and filter by scoped repositories
+REPOS=$(jq -r ".[].nameWithOwner" "$2")
+
+cat ../../reports/packages.json |
+  jq -rc '.[] | .packages | .[] | {repository_full_name: .repository_full_name, repository_name: .repository_name, name: .name, type: .type}' |
+  jq -s '.' |
+  jq -rc 'group_by(.repository_full_name) | .[] | {repository_full_name: .[0].repository_full_name, repository_name: .[0].repository_name, packages: [.[] | {name: .name, type: .type}]}' |
+  jq -s '.' |
+  jq -rc --arg repos "${REPOS[@]}" '.[] | select(.repository_full_name as $repo | $repos | index($repo))' \
+    >../../reports/repository-packages.json

@@ -4,8 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       org_names:
-        description: 'Please provide comma separated list of organization names'
+        description: "Please provide comma separated list of organization names"
         required: true
+      repo_file_path:
+        description: "Please provide path to the file with repository names relative to repository root path. "
+        required: true
+        default: "reports/repos.json"
 
 jobs:
   get-orgs:
@@ -74,8 +78,8 @@ jobs:
       matrix:
         org: ${{ fromJson(needs.get-orgs.outputs.orgs) }}
         composite-action:
+          - repository/actions
           - organization/actions
-          - organization/actions-history
           - organization/apps
           - organization/packages
           - organization/projects
@@ -88,6 +92,7 @@ jobs:
           - repository/teams
           - repository/users
           - repository/webhooks
+          - repository/actions-history
 
     steps:
       - name: Checkout
@@ -116,7 +121,7 @@ jobs:
         if: ${{ matrix.composite-action == 'organization/actions' }}
 
       - name: Run ${{ matrix.composite-action }} on ${{ matrix.org }}
-        run: ./script.sh ${{ matrix.org }}
+        run: ./script.sh ${{ matrix.org }} ${{ github.workspace }}/${{ inputs.repo_file_path }}
         shell: bash
         working-directory: ${{ matrix.composite-action }}
         env:

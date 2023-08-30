@@ -1,3 +1,5 @@
 *.json
 *.bak
 .DS_Store
+.act
+build.sh
