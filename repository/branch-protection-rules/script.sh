@@ -6,7 +6,8 @@ set -eo pipefail
 mkdir -p ../../reports
 
 REPOS=$(jq -r ".[].name" ../../reports/repos.json)
-echo "[]" > protections.json
+DEST=../../reports/branch-protection-rules.json
+echo "[]" > $DEST
 
 while read -r repo ; do
     echo "Auditing repository ${repo} ..."
@@ -83,10 +84,9 @@ while read -r repo ; do
 
     echo "$PROTECTIONS_RESULT" > repo_protections.json
 
-    cp protections.json tmp.json
-    jq -sc add tmp.json repo_protections.json > ../../reports/branch-protection-rules.json
+    cp $DEST tmp.json
+    jq -sc add tmp.json repo_protections.json > $DEST
 
-    rm -rf repo_protections.json
-    rm -rf tmp.json
+    rm -rf repo_protections.json, tmp.json
 
 done <<< "$REPOS"

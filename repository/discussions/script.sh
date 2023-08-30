@@ -6,12 +6,14 @@ set -eo pipefail
 mkdir -p ../../reports
 
 REPOS=$(jq -r ".[].name" ../../reports/repos.json)
-echo "[]" > discussions.json
+DEST=../../reports/discussions.json
+echo "[]" >$DEST
 
-while read -r repo ; do
-    echo "Auditing repository $repo ..."
+while read -r repo; do
+  echo "Auditing repository $repo ..."
 
-    DISCUSSIONS_RESULT=$(gh api graphql --paginate -H X-Github-Next-Global-ID:true -F owner="${1}" -F name="${repo}" -f query='query($owner: String!, $name: String!, $endCursor: String = null) {
+  DISCUSSIONS_RESULT=$(
+    gh api graphql --paginate -H X-Github-Next-Global-ID:true -F owner="${1}" -F name="${repo}" -f query='query($owner: String!, $name: String!, $endCursor: String = null) {
   repository(owner: $owner, name: $name) {
     discussions(first: 100, after: $endCursor) {
       totalCount
@@ -25,13 +27,12 @@ while read -r repo ; do
     }
   }
 }' | REPO=$repo jq '[{ repo: env.REPO, discussions: .data.repository.discussions.totalCount }]'
-    )
-    echo "$DISCUSSIONS_RESULT" > repo_discussions.json
+  )
+  echo "$DISCUSSIONS_RESULT" >repo_discussions.json
 
-    cp discussions.json tmp.json
-    jq -sc add tmp.json repo_discussions.json > ../../reports/discussions.json
+  cp $DEST tmp.json
+  jq -sc add tmp.json repo_discussions.json >$DEST
 
-    rm -rf repo_discussions.json
-    rm -rf tmp.json
+  rm -rf repo_discussions.json tmp.json
 
-done <<< "$REPOS"
+done <<<"$REPOS"

@@ -6,7 +6,8 @@ set -eo pipefail
 mkdir -p ../../reports
 
 TYPES=(npm maven rubygems docker nuget)
-echo "[]" >packages.json
+DEST=packages.json
+echo "[]" >$DEST
 
 for i in "${TYPES[@]}"; do
   type="$i"
@@ -16,17 +17,17 @@ for i in "${TYPES[@]}"; do
   echo $PACKAGES_RESULT | jq "[{ org: .[].owner.login, packages: [ { type: .[].package_type, name: .[].name, repository_name: .[].repository.name, repository_full_name: .[].repository.full_name } ] }]" \
     >type_packages.json
 
-  cp packages.json tmp.json
-  jq -sc add tmp.json type_packages.json >packages.json
+  cp $DEST tmp.json
+  jq -sc add tmp.json type_packages.json >$DEST
   rm -rf type_packages.json, tmp.json
 done
 
-jq -c ' [{org: (.[0].org), packages: ([ .[].packages? | .[] | { type: .type, name: .name, repository_name: .repository_name, repository_full_name: .repository_full_name  } ] ) } ]' packages.json >../../reports/packages.json
+jq -c ' [{org: (.[0].org), packages: ([ .[].packages? | .[] | { type: .type, name: .name, repository_name: .repository_name, repository_full_name: .repository_full_name  } ] ) } ]' $DEST >../../reports/packages.json
 
 # Group by repository full name and filter by scoped repositories
 REPOS=$(jq -r ".[].nameWithOwner" "$2")
 
-cat ../../reports/packages.json |
+cat $DEST |
   jq -rc '.[] | .packages | .[] | {repository_full_name: .repository_full_name, repository_name: .repository_name, name: .name, type: .type}' |
   jq -s '.' |
   jq -rc 'group_by(.repository_full_name) | .[] | {repository_full_name: .[0].repository_full_name, repository_name: .[0].repository_name, packages: [.[] | {name: .name, type: .type}]}' |
