@@ -5,7 +5,7 @@ set -eo pipefail
 # create ../../reports if it doesn't exist
 mkdir -p ../../reports
 
-REPOS=$(jq -r ".[].name" ../../reports/repos.json)
+REPOS=$(jq -r ".[].name" "${2}")
 ENV_SECRET_DEST=../../reports/environments_secrets.json
 DEST=../../reports/environments.json
 echo "[]" >$DEST

@@ -1,14 +1,16 @@
-name: 'Repository Premissions'
-description: 'Get repository permissions'
+name: "Repository Premissions"
+description: "Get repository permissions"
 
 inputs:
   org:
-    description: 'Organization name'
+    description: "Organization name"
     required: true
-
+  repos:
+    description: "Path to file containing list of repositories"
+    required: true
 runs:
   using: "composite"
   steps:
-    - run: ./script.sh ${{ inputs.org }}
+    - run: ./script.sh ${{ inputs.org }} ${{ inputs.repos }}
       shell: bash
       working-directory: ./repository/permissions

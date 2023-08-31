@@ -1,14 +1,17 @@
-name: 'Repository Teams'
-description: 'Get repository teams'
+name: "Repository Teams"
+description: "Get repository teams"
 
 inputs:
   org:
-    description: 'Organization name'
+    description: "Organization name"
+    required: true
+  repos:
+    description: "Path to file containing list of repositories"
     required: true
 
 runs:
   using: "composite"
   steps:
-    - run: ./script.sh ${{ inputs.org }}
+    - run: ./script.sh ${{ inputs.org }} ${{ inputs.repos }}
       shell: bash
       working-directory: ./repository/teams
