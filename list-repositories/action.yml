@@ -1,0 +1,23 @@
+name: 'List Organization Repositories by Bucket'
+description: 'List Organization Repositories by Bucket'
+
+inputs:
+  bucket_size:
+    description: 'Bucket size - number of repositories per file'
+    required: true
+  page_size:
+    description: 'Page size - number of repositories per page in the GraphQL query'
+    required: true
+  org:
+    description: 'Organization'
+    required: true
+  sleep_time:
+    description: 'Sleep time between GraphQL queries to avoid secondary rate limit'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./script.sh ${{ inputs.org }} ${{ inputs.bucket_size }} ${{ inputs.page_size }} ${{ inputs.sleep_time }}
+      shell: bash
+      working-directory: ./list-repositories

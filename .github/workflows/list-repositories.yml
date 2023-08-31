@@ -1,0 +1,48 @@
+name: List repositories by bucket
+
+on:
+  workflow_dispatch:
+    inputs:
+      bucket_size:
+        description: 'Bucket size - number of repositories per file'
+        required: true
+        default: 3000
+      page_size:
+        description: 'Page size - number of repositories per page in the GraphQL query'
+        required: true
+        default: 50
+      org:
+        description: 'Organization'
+        required: true
+      sleep_time:
+        description: 'Sleep time between GraphQL queries to avoid secondary rate limit'
+        required: true
+        default: 1
+
+jobs:
+  list-repositories:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@8e1ba3bf1619726336414f1014e37f17fbadf1db
+        with:
+          application_id: ${{ secrets.APPLICATION_ID }}
+          application_private_key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
+          organization: ${{ inputs.org }}
+      - name: List repositories
+        uses: ./list-repositories
+        env:
+          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+        with:
+          org: ${{ inputs.org }}
+          sleep_time: ${{ inputs.sleep_time }}
+          bucket_size: ${{ inputs.bucket_size }}
+          page_size: ${{ inputs.page_size }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: repos
+          path: repos_*.json
