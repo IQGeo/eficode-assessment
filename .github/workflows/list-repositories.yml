@@ -6,7 +6,7 @@ on:
       bucket_size:
         description: 'Bucket size - number of repositories per file'
         required: true
-        default: 3000
+        default: 1000
       page_size:
         description: 'Page size - number of repositories per page in the GraphQL query'
         required: true
