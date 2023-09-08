@@ -23,12 +23,14 @@ while read -r repo; do
     # Get the environment secrets for this repository
     ENVNAMES=$(jq -r ".[].env[].name" repo_env.json)
     echo "[]" >spec_environments_secrets.json
-    while read -r envname; do
-        if [ -z $envname ]; then
+    while IFS="=" read -r envname; do
+        if [ -z "${envname}" ]; then
             continue
         fi
 
-        ENVSECRETS=$(gh api --paginate /repos/${1}/$repo/environments/$envname/secrets -H X-Github-Next-Global-ID:true | REPO=$repo ENVNAME=$envname jq '[ {  name : env.ENVNAME , secrets: .secrets } ]')
+        ENCODEDNAME=$(echo "${envname}" | jq "@uri" -jRr)
+        ENVSECRETS=$(gh api --paginate "/repos/${1}/${repo}/environments/${ENCODEDNAME}/secrets" -H X-Github-Next-Global-ID:true | REPO="${repo}" ENVNAME="${envname}" jq '[ {  name : env.ENVNAME , secrets: .secrets } ]')
+
         echo $ENVSECRETS >repo_env_secrets.json
         cp spec_environments_secrets.json tmpsecrets.json
         jq -s add tmpsecrets.json repo_env_secrets.json >spec_environments_secrets.json
