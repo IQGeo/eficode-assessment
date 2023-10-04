@@ -17,7 +17,7 @@ for i in "${TYPES[@]}"; do
     -H X-Github-Next-Global-ID:true \
     --paginate \
     "/orgs/${OWNER}/packages?package_type=${type}" \
-    --jq ". | group_by(.package_type) | map({(.[0].package_type): length})" \
+    --jq "[ .[] | {"name": .name, "package_type": .package_type, "linked_repo": .repository.name } ]" \
     > "${i}_type.json"
 
 done

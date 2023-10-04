@@ -1,0 +1,65 @@
+name: GHEC EMU Migration Audit Packages by Organization
+
+on:
+  workflow_dispatch:
+    inputs:
+      org_names:
+        description: "Please provide comma separated list of organization names"
+        required: true
+
+jobs:
+  get-orgs:
+    runs-on: ubuntu-latest
+
+    outputs:
+      orgs: ${{ steps.create-matrix.outputs.orgs }}
+
+    steps:
+      - name: Create Matrix
+        id: create-matrix
+        run: |
+          ORGS=$(echo -n "${org_names}" | sed 's/ //g' | jq -cRs 'split(",")')
+          echo "orgs=${ORGS}" >> "$GITHUB_OUTPUT"
+        env:
+          org_names: ${{ github.event.inputs.org_names }}
+
+  audit:
+    runs-on: ubuntu-latest
+
+    needs:
+      - get-orgs
+
+    continue-on-error: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        org: ${{ fromJson(needs.get-orgs.outputs.orgs) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@8e1ba3bf1619726336414f1014e37f17fbadf1db
+        with:
+          application_id: ${{ secrets.APPLICATION_ID }}
+          application_private_key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
+          organization: ${{ matrix.org }}
+
+      - name: Run organization/packages on ${{ matrix.org }}
+        run: ./script.sh ${{ matrix.org }} ${{ github.workspace }}/reports/repos.json
+        shell: bash
+        working-directory: organization/packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+
+      - name: Upload organization/packages results
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: ${{ matrix.org }}-reports
+          path: reports/
+          retention-days: 1
