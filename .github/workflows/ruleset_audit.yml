@@ -1,0 +1,43 @@
+name: GHEC EMU Migration Audit Rulesets by File
+
+on:
+  workflow_dispatch:
+    inputs:
+      org_name:
+        description: "Please provide an organization name"
+        required: true
+      repo_file_path:
+        description: "Please provide path to the file with repository names relative to repository root path"
+        required: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Copy ${{ github.event.inputs.org_name }} repository file to report folder
+        run: |
+          mkdir -p "${{ github.workspace }}/reports"
+          cp "${{ github.workspace }}/${{ github.event.inputs.repo_file_path }}" "${{ github.workspace }}/reports/repos.json"
+        shell: bash
+
+      - name: Run repository/ruleset on ${{ github.event.inputs.org_name }}
+        run: ./script.sh ${{ github.event.inputs.org_name }} "${{ github.workspace }}/${{ github.event.inputs.repo_file_path }}"
+        shell: bash
+        working-directory: repository/ruleset
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+
+      - name: Upload organization/packages results
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: ${{ github.event.inputs.org_name }}-reports
+          path: reports/
+          retention-days: 1
