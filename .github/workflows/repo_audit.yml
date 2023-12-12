@@ -1,13 +1,28 @@
-name: GHEC EMU Migration Audit by CSV
+name: GHEC EMU Migration Audit per repo
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       org_name:
         description: "Please provide an organization name"
         required: true
-      repo_names:
-        description: "Please provide a comma seperated list of repository names"
+        type: string
+      repo_name:
+        description: "Please provide a repository name"
+        required: true
+        type: string
+    secrets:
+      reusable_workflow_token:
+        description: 'A token passed from the caller workflow'
+        required: true
+      APPLICATION_ID:
+        description: 'GitHub App ID'
+        required: true
+      APPLICATION_PRIVATE_KEY:
+        description: 'GitHub App Private Key'
+        required: true
+      PAT:
+        description: 'A token passed from the caller workflow'
         required: true
 
 jobs:
@@ -17,28 +32,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        with:
+          repository: 'emu-migration-reporting/emu-assessment'
+          ref: main
+          token: ${{ secrets.reusable_workflow_token }}
+
+      - name: Debug
+        run: |
+          echo ${{ inputs.org_name }}
 
       - name: Get Token
         id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@8e1ba3bf1619726336414f1014e37f17fbadf1db
+        uses: actions/create-github-app-token@eaddb9eb7e4226c68cf4b39f167c83e5bd132b3e
         with:
-          application_id: ${{ secrets.APPLICATION_ID }}
-          application_private_key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
-          organization: ${{ github.event.inputs.org_name }}
+          app-id: ${{ secrets.APPLICATION_ID }}
+          private-key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
+          owner: ${{ inputs.org_name }}
 
-      - name: Run repository-audit on ${{ github.event.inputs.org_name }}
+      - name: Run repository-audit on ${{ inputs.org_name }}
         uses: ./repository/repository
         id: repositories
         with:
-          org: ${{ github.event.inputs.org_name }}
-          repos: "${{ github.event.inputs.repo_names }}"
+          org: ${{ inputs.org_name }}
+          repos: "${{ inputs.repo_name }}"
         env:
           GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
 
-      - name: Upload ${{ github.event.inputs.org_name }} results
+      - name: Upload ${{ inputs.org_name }} results
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         with:
-          name: ${{ github.event.inputs.org_name }}-repositories
+          name: ${{ inputs.org_name }}-repositories
           path: reports/
           retention-days: 1
 
@@ -92,22 +115,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
         with:
-          ref: ${{ github.ref_name }}
+          repository: 'emu-migration-reporting/emu-assessment'
+          ref: main
+          token: ${{ secrets.reusable_workflow_token }}
 
-      - name: Download ${{ github.event.inputs.org_name }} repository-audit results
+      - name: Download ${{ inputs.org_name }} repository-audit results
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
         with:
-          name: ${{ github.event.inputs.org_name }}-repositories
+          name: ${{ inputs.org_name }}-repositories
           path: reports
 
       - name: Get Token
         id: get_workflow_token
         if: ${{ matrix.composite-action.auth == 'githubapp' }}
-        uses: peter-murray/workflow-application-token-action@8e1ba3bf1619726336414f1014e37f17fbadf1db
+        uses: actions/create-github-app-token@eaddb9eb7e4226c68cf4b39f167c83e5bd132b3e
         with:
-          application_id: ${{ secrets.APPLICATION_ID }}
-          application_private_key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
-          organization: ${{ github.event.inputs.org_name }}
+          app-id: ${{ secrets.APPLICATION_ID }}
+          private-key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
+          owner: ${{ inputs.org_name }}
 
       - name: Setup Node
         uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -115,17 +140,17 @@ jobs:
           node-version: 18
         if: ${{ matrix.composite-action.action == 'organization/actions' }}
 
-      - name: Run ${{ matrix.composite-action.action }} on ${{ github.event.inputs.org_name }}
+      - name: Run ${{ matrix.composite-action.action }} on ${{ inputs.org_name }}
         if: ${{ matrix.composite-action.auth == 'githubapp' }}
-        run: ./script.sh ${{ github.event.inputs.org_name }} "${{ github.workspace }}/reports/repos.json"
+        run: ./script.sh ${{ inputs.org_name }} "${{ github.workspace }}/reports/repos.json"
         shell: bash
         working-directory: ${{ matrix.composite-action.action }}
         env:
           GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
 
-      - name: Run ${{ matrix.composite-action.action }} on ${{ github.event.inputs.org_name }}
+      - name: Run ${{ matrix.composite-action.action }} on ${{ inputs.org_name }}
         if: ${{ matrix.composite-action.auth == 'pat' }}
-        run: ./script.sh ${{ github.event.inputs.org_name }} "${{ github.workspace }}/reports/repos.json"
+        run: ./script.sh ${{ inputs.org_name }} "${{ github.workspace }}/reports/repos.json"
         shell: bash
         working-directory: ${{ matrix.composite-action.action }}
         env:
@@ -134,6 +159,6 @@ jobs:
       - name: Upload ${{ matrix.composite-action.action }} results
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         with:
-          name: ${{ github.event.inputs.org_name }}-reports
+          name: ${{ inputs.org_name }}-reports
           path: reports/
           retention-days: 1
