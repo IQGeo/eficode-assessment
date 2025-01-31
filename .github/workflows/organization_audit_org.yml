@@ -154,7 +154,10 @@ jobs:
 
       - name: Extract action name
         id: extract_action_name
-        run: echo "action_name=$(basename ${{ matrix.composite-action.action }})" >> $GITHUB_ENV
+        run: |
+          action_name=$(basename ${{ matrix.composite-action.action }})
+          echo "action_name=$action_name" >> $GITHUB_ENV
+          echo "Action name: $action_name"
 
       - name: Upload ${{ matrix.composite-action.action }} results
         uses: actions/upload-artifact@v4
