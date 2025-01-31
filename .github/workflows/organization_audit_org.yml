@@ -86,8 +86,8 @@ jobs:
           #   auth: githubapp
           # - action: repository/permissions
           #   auth: githubapp
-          # - action: repository/projects
-          #   auth: githubapp
+          - action: repository/projects
+            auth: githubapp
           # - action: repository/teams
           #   auth: githubapp
           # - action: repository/users
@@ -102,8 +102,8 @@ jobs:
           # - action: organization/packages
           #   auth: pat
           # - organization/projects
-          - action: organization/secrets
-            auth: githubapp
+          # - action: organization/secrets
+          #   auth: githubapp
           - action: organization/webhooks
             auth: githubapp
 
