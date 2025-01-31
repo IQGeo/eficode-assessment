@@ -152,9 +152,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
+      - name: Extract action name
+        id: extract_action_name
+        run: echo "action_name=$(basename ${{ matrix.composite-action.action }})" >> $GITHUB_ENV
+
       - name: Upload ${{ matrix.composite-action.action }} results
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.org }}-${{ matrix.composite-action.action | split('/')[-1] }}-reports
+          name: ${{ matrix.org }}-${{ steps.extract_action_name.outputs.action_name }}-reports
           path: reports/
           retention-days: 1
