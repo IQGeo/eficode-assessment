@@ -155,6 +155,6 @@ jobs:
       - name: Upload ${{ matrix.composite-action.action }} results
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.org }}-${{ matrix.composite-action.action }}-reports
+          name: ${{ matrix.org }}-${{ matrix.composite-action.action | split('/')[-1] }}-reports
           path: reports/
           retention-days: 1
