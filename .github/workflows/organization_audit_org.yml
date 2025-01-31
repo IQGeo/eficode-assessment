@@ -54,7 +54,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
 
       - name: Upload ${{ matrix.org }} results
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.org }}-repositories
           path: reports/
@@ -116,7 +116,7 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - name: Download ${{ matrix.org }} repository-audit results
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.org }}-repositories
           path: reports
@@ -153,7 +153,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
       - name: Upload ${{ matrix.composite-action.action }} results
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.org }}-reports
           path: reports/
