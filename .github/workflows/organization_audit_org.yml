@@ -76,34 +76,34 @@ jobs:
         composite-action:
           # - action: repository/actions
           #   auth: githubapp
-          # - action: repository/actions-history
-          #   auth: githubapp
-          # - action: repository/branch-protection-rules
-          #   auth: githubapp
-          # - action: repository/discussions
-          #   auth: githubapp
-          # - action: repository/environments
-          #   auth: githubapp
-          # - action: repository/permissions
-          #   auth: githubapp
-          # - action: repository/projects
-          #   auth: githubapp
-          # - action: repository/teams
-          #   auth: githubapp
-          # - action: repository/users
-          #   auth: githubapp
-          # - action: repository/webhooks
-          #   auth: githubapp
-          # - action: repository/ruleset
-          #   auth: githubapp
-          # #- organization/actions
+          - action: repository/actions-history
+            auth: githubapp
+          - action: repository/branch-protection-rules
+            auth: githubapp
+          - action: repository/discussions
+            auth: githubapp
+          - action: repository/environments
+            auth: githubapp
+          - action: repository/permissions
+            auth: githubapp
+          - action: repository/projects
+            auth: githubapp
+          - action: repository/teams
+            auth: githubapp
+          - action: repository/users
+            auth: githubapp
+          - action: repository/webhooks
+            auth: githubapp
+          - action: repository/ruleset
+            auth: githubapp
+          # organization/actions
           - action: organization/apps
             auth: githubapp
-          # - action: organization/packages
-          #   auth: pat
-          # - organization/projects
-          # - action: organization/secrets
-          #   auth: githubapp
+          - action: organization/packages
+            auth: pat
+          # organization/projects
+          - action: organization/secrets
+            auth: githubapp
           - action: organization/webhooks
             auth: githubapp
 
