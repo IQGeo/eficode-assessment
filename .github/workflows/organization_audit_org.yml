@@ -60,7 +60,7 @@ jobs:
           path: reports/
           retention-days: 1
 
-  audit:
+  audit:  
     runs-on: ubuntu-latest
 
     needs:
@@ -74,33 +74,33 @@ jobs:
       matrix:
         org: ${{ fromJson(needs.get-orgs.outputs.orgs) }}
         composite-action:
-          - action: repository/actions
-            auth: githubapp
-          - action: repository/actions-history
-            auth: githubapp
-          - action: repository/branch-protection-rules
-            auth: githubapp
-          - action: repository/discussions
-            auth: githubapp
-          - action: repository/environments
-            auth: githubapp
-          - action: repository/permissions
-            auth: githubapp
-          - action: repository/projects
-            auth: githubapp
-          - action: repository/teams
-            auth: githubapp
-          - action: repository/users
-            auth: githubapp
-          - action: repository/webhooks
-            auth: githubapp
-          - action: repository/ruleset
-            auth: githubapp
-          #- organization/actions
-          - action: organization/apps
-            auth: githubapp
-          - action: organization/packages
-            auth: pat
+          # - action: repository/actions
+          #   auth: githubapp
+          # - action: repository/actions-history
+          #   auth: githubapp
+          # - action: repository/branch-protection-rules
+          #   auth: githubapp
+          # - action: repository/discussions
+          #   auth: githubapp
+          # - action: repository/environments
+          #   auth: githubapp
+          # - action: repository/permissions
+          #   auth: githubapp
+          # - action: repository/projects
+          #   auth: githubapp
+          # - action: repository/teams
+          #   auth: githubapp
+          # - action: repository/users
+          #   auth: githubapp
+          # - action: repository/webhooks
+          #   auth: githubapp
+          # - action: repository/ruleset
+          #   auth: githubapp
+          # #- organization/actions
+          # - action: organization/apps
+          #   auth: githubapp
+          # - action: organization/packages
+          #   auth: pat
           # - organization/projects
           - action: organization/secrets
             auth: githubapp
@@ -155,6 +155,6 @@ jobs:
       - name: Upload ${{ matrix.composite-action.action }} results
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.org }}-reports
+          name: ${{ matrix.org }}-${{ matrix.composite-action.action }}-reports
           path: reports/
           retention-days: 1
