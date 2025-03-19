@@ -24,6 +24,7 @@ Note that currently we can not retrieve containers from the packages endpoint wi
 For more information regarding which data is or is not migrated, see [GitHub.com migration support](https://docs.github.com/en/migrations/using-github-enterprise-importer/understanding-github-enterprise-importer/migration-support-for-github-enterprise-importer#githubcom-migration-support).
 
 ## Prerequisites
+
 - Organization owner in order to create and install the GitHub app.
 - GitHub App with bare minimum permissions.
 - A PAT token.
@@ -52,3 +53,6 @@ For more information regarding which data is or is not migrated, see [GitHub.com
 
 The result from running the composite actions, will be a series of artifacts for each organization and repository data point containing one or more json files.
 
+## GitHub Application URL
+
+[Solidify-EMU-Assessment](https://github.com/apps/solidify-emu-assessment)
