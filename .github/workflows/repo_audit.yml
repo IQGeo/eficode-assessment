@@ -107,7 +107,7 @@ jobs:
           # - organization/projects
           - action: organization/secrets
             auth: githubapp
-          - action: organization/webhooks
+          - action: organization/org_webhooks
             auth: githubapp
 
 
