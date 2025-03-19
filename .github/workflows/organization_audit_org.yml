@@ -157,6 +157,12 @@ jobs:
           echo "action_name=$action_name" >> $GITHUB_ENV
           echo "Action name: $action_name"
 
+      - name: Temp Test ${{ matrix.composite-action.action }} on ${{ matrix.org }}
+        run: |
+          ls -lsa ${{ github.workspace }}/reports
+          du -sh ${{ github.workspace }}/reports
+          cat ${{ github.workspace }}/reports/*
+
       - name: Upload ${{ matrix.composite-action.action }} results
         uses: actions/upload-artifact@v4
         with:
