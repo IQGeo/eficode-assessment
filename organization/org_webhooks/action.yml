@@ -11,4 +11,4 @@ runs:
   steps:
     - run: ./script.sh ${{ inputs.org }}
       shell: bash
-      working-directory: ./organization/webhooks
+      working-directory: ./organization/org_webhooks

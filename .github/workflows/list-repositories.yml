@@ -5,10 +5,12 @@ on:
     inputs:
       bucket_size:
         description: 'Bucket size - number of repositories per file'
+        type: number
         required: true
         default: 1000
       page_size:
         description: 'Page size - number of repositories per page in the GraphQL query'
+        type: number
         required: true
         default: 50
       org:
@@ -16,6 +18,7 @@ on:
         required: true
       sleep_time:
         description: 'Sleep time between GraphQL queries to avoid secondary rate limit'
+        type: number
         required: true
         default: 1
 
