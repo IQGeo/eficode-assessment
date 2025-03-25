@@ -17,4 +17,4 @@ for repo in $(echo "${data}" | jq -r '.[] | select(.branchProtectionRules != [])
 done
 
 # Write the markdown data into a file
-printf "${markdown_data}" > branch-protection-rules.md
+printf "%s" "${markdown_data}" > branch-protection-rules.md

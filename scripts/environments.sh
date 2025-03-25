@@ -17,4 +17,4 @@ for repo in $(echo "${data}" | jq -r '.[] | select(.env != []) | .repo'); do
 done
 
 # Write the markdown data into a file
-printf "${markdown_data}" > environments.md
+printf "%s" "${markdown_data}" > environments.md

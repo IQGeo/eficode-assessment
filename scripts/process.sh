@@ -27,7 +27,7 @@ printf "\n## Content\n" >> combined_report.md
 # Combine all the markdown files into a single markdown file
 for file in *.md; do
     if [ "${file}" != "combined_report.md" ]; then
-        printf "\n### ${file}\n" >> combined_report.md
+        printf "\n### \"%s\"\n" "${file}" >> combined_report.md
         cat "${file}" >> combined_report.md
     fi
 done

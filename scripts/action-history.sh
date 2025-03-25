@@ -22,4 +22,4 @@ for name in $(echo "${data}" | jq -r '.[] | select(.workflows != []) | .name'); 
 done
 
 # Write the markdown data into a file
-printf "${markdown_data}" > action-history.md
+printf '%s' "${markdown_data}" > action-history.md
