@@ -64,7 +64,10 @@ for file in *.md; do
     fi
 done
 
+sh ./_generate_pdfs.sh
+
 printf "\nMoving all .md files to the ../reports folder\n"
 mv ./*.md ../reports/
+mv ./*.pdf ../reports/
 echo "Removing all .sh files from the destination fodler: ${DESTINATION_FOLDER}"
 rm -f ./*.sh
