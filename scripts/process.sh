@@ -39,35 +39,14 @@ for script in *.sh; do
     fi
 done
 
-# Initialize the combined markdown file
-echo "# Combined Report" > combined_report.md
-printf "\n## Index\n" >> combined_report.md
+echo "Creating combined report"
+sh ./_combine_reports.sh
 
-# Create an index for the first two headings in each markdown file
-for file in *.md; do
-    if [ "${file}" != "combined_report.md" ]; then
-        echo "- [${file}](#${file})" >> combined_report.md
-        # heading1=$(sed -n '/^# /p' "${file}" | head -1)
-        # heading2=$(sed -n '/^## /p' "${file}" | head -1)
-        # echo "  - [${heading1}](#${heading1// /-})"
-        # echo "  - [${heading2}](#${heading2// /-})"
-    fi
-done
-
-printf "\n## Content\n" >> combined_report.md
-
-# Combine all the markdown files into a single markdown file
-for file in *.md; do
-    if [ "${file}" != "combined_report.md" ]; then
-        printf "\n### \"%s\"\n" "${file}" >> combined_report.md
-        cat "${file}" >> combined_report.md
-    fi
-done
-
+printf "\nGenerating PDF files for all Markdown files in this folder\n"
 sh ./_generate_pdfs.sh
 
-printf "\nMoving all .md files to the ../reports folder\n"
+printf "\nMoving Markdown and PDF files to ../reports\n"
 mv ./*.md ../reports/
 mv ./*.pdf ../reports/
-echo "Removing all .sh files from the destination fodler: ${DESTINATION_FOLDER}"
+printf "\nRemoving scripts from the destination folder: %s\n" "${DESTINATION_FOLDER}"
 rm -f ./*.sh
