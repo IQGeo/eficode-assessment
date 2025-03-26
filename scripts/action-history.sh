@@ -4,11 +4,12 @@
 data=$(jq '.' actions-history.json)
 
 # Initialize markdown data
-markdown_data="# Repo Workflows and Last Run Dates\n\n"
+markdown_data=""
+printf -v markdown_data "# Repo Workflows and Last Run Dates\n\n"
 
 # Loop through the data and format it into markdown
 for name in $(echo "${data}" | jq -r '.[] | select(.workflows != []) | .name'); do
-  markdown_data+="## ${name}\n\n"
+  printf -v markdown_data "%s## %s\n\n" "$markdown_data" "$name"
   workflows=$(echo "${data}" | jq -r ".[] | select(.name == \"${name}\") | .workflows[] | {name: .name, last_run: .last_run} | @base64")
   for workflow in ${workflows}; do
     _jq() {
@@ -16,10 +17,10 @@ for name in $(echo "${data}" | jq -r '.[] | select(.workflows != []) | .name'); 
     }
     workflow_name=$(_jq '.name')
     last_run=$(_jq '.last_run')
-    markdown_data+="- ${workflow_name}, Last Run: ${last_run}\n"
+    printf -v markdown_data "%s- %s, Last Run: %s\n" "$markdown_data" "$workflow_name" "$last_run"
   done
-  markdown_data+="\n"
+  printf -v markdown_data "%s\n" "$markdown_data"
 done
 
 # Write the markdown data into a file
-printf '%s' "${markdown_data}" > action-history.md
+printf "%s" "${markdown_data}" > action-history.md
