@@ -16,7 +16,7 @@ unique_hostnames=$(echo "${hostnames}" | sort | uniq)
 
 # Print the unique hostnames
 # add the unique hostnames to the webhooks.md file with a header called Unique Hostnames
-echo "## Unique Hostnames" >> webhooks.md
+printf "\n## Unique Hostnames\n\n" >> webhooks.md
 
 # Format the unique hostnames as bullet points and append them to the markdown file
 for hostname in ${unique_hostnames}; do

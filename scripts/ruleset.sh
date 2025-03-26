@@ -5,7 +5,7 @@ filtered_data=$(jq '.[] | select(.rulesets != 0)' ruleset.json)
 
 # Initialize markdown data
 markdown_data=""
-printf -v markdown_data "# Report\n\n"
+printf -v markdown_data "# Rulesets\n\n"
 
 # Loop through the filtered data and format it into markdown
 for repo in $(echo "${filtered_data}" | jq -r '.repo'); do

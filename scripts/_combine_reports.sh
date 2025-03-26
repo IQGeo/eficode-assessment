@@ -6,8 +6,9 @@ printf "\n## Index\n\n" >> combined_report.md
 
 # Create an index for the first two headings in each markdown file
 for file in *.md; do
+    filename="${file%.md}"
     if [ "${file}" != "combined_report.md" ]; then
-        echo "- [${file}](###${file})" >> combined_report.md
+        echo "- [${filename//-/ }](#${filename})" >> combined_report.md
         # heading1=$(sed -n '/^# /p' "${file}" | head -1)
         # heading2=$(sed -n '/^## /p' "${file}" | head -1)
         # echo "  - [${heading1}](#${heading1// /-})"
@@ -19,8 +20,9 @@ printf "\n## Content\n" >> combined_report.md
 
 # Combine all the markdown files into a single markdown file
 for file in *.md; do
+    filename="${file%.md}"
     if [ "${file}" != "combined_report.md" ]; then
-        printf "\n### %s\n\n" "${file}" >> combined_report.md
+        printf "\n###### %s\n\n" "${filename}" >> combined_report.md
         cat "${file}" >> combined_report.md
     fi
 done
