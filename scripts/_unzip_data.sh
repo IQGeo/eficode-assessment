@@ -1,11 +1,14 @@
 #!/bin/bash
 
-SOURCE_FOLDER="${1:-~/Downloads}"
+SOURCE_FOLDER="${1}"
 DESTINATION_FOLDER="${2}"
 
+if [ -z "$SOURCE_FOLDER" ]; then
+  echo "Source folder is required" ; exit 1
+fi
+
 if [ -z "$DESTINATION_FOLDER" ]; then
-  echo "Destination folder is required"
-  exit 1
+  echo "Destination folder is required"; exit 1
 fi
 
 if [ ! -d "$DESTINATION_FOLDER" ]; then
