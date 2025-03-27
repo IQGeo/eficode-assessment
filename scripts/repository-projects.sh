@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Read the JSON file and format the data into markdown
-markdown_data=$(jq -r '.[] | "# " + .nameWithOwner, (.projects.nodes[] | "## Project: " + .name)' repository-projects.json)
+{
+  printf "# Repository Projects\n\n"
 
-# Write the markdown data into a file
-echo "${markdown_data}" > repository-projects.md
+  # Read the JSON file and format the data into markdown
+  jq -r '.[] | "## " + .nameWithOwner + "\n", (.projects.nodes[] | "### Project: " + .name + "\n")' repository-projects.json
+} > repository-projects.md

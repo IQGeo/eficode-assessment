@@ -3,18 +3,21 @@
 # Read the JSON file
 data=$(jq '.' environments.json)
 
-# Initialize markdown data
-markdown_data="# Repo Environments and Protection Rules\n\n"
+{
+  printf "# Repo Environments and Protection Rules\n\n"
+  printf "Number of protection rules for each environment:"
+} > environments.md
 
 # Loop through the data and format it into markdown
-for repo in $(echo "${data}" | jq -r '.[] | select(.env != []) | .repo'); do
-  markdown_data+="## ${repo}\n\n"
-  envs=$(echo "${data}" | jq -r ".[] | select(.repo == \"${repo}\") | .env[]")
-  for env in $(echo "${envs}" | jq -r '.name'); do
-    num_rules=$(echo "${envs}" | jq -r "select(.name == \"${env}\") | .protectionrules | length")
-    markdown_data+="### ${env}\n\nNumber of protection rules: ${num_rules}\n\n"
+echo "${data}" | jq -rc '.[] | select(.env != [])' | while read -r repo; do
+  repo_name=$(echo "${repo}" | jq -rc '.repo')
+  envs=$(echo "${repo}" | jq -rc ".env")
+  printf "\n\n## %s\n" "$repo_name" >> "environments.md"
+  echo "${envs}" | jq -rc '.[]' | while read -r env; do
+    env_name="$(echo "${env}" | jq -rc '.name')"
+    num_rules=$(echo "${env}" | jq -rc ".protectionrules | length")
+    printf "\n- %s: %s" "$env_name" "$num_rules" >> "environments.md"
   done
 done
 
-# Write the markdown data into a file
-echo -e "${markdown_data}" > environments.md
+echo "" >> "environments.md"
