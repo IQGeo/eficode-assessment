@@ -54,6 +54,20 @@ csv_to_json() {
   python3 -c 'import csv, json, sys; print(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))' < "$1"
 }
 
+get_by_key_from_json_object() {
+  local json_object="$1"
+  local key="$2"
+  echo "$json_object" | jq --arg key "$key" '.[$key]' -r
+}
+
+create_team_using_gh_gei() {
+  local org="$1"
+  local gh_team="$2"
+  local az_group="$3"
+  echo "Updating ${org} team: ${gh_team} to IdP group: ${az_group}..."
+  gh gei create-team --github-org "$org" --team-name "$gh_team" --idp-group "$az_group"
+}
+
 fetch_external_groups() {
   local org_name="$1"
   local response
@@ -90,12 +104,12 @@ while IFS= read -r group; do
     '.[] | select(.[$azure_column] == $group_name)' "$CSV_AS_JSON_FILE")
 
   if [ -n "$matching_row" ]; then
-    github_team_name="$(echo "$matching_row" | jq --arg github_team_column "$GITHUB_TEAM_COLUMN" '.[$github_team_column]' -r)"
+    gh_team="$(get_by_key_from_json_object "$matching_row" "$GITHUB_TEAM_COLUMN")"
 
-    # echo "AZ_Group: ${group_name} - GH_ID: ${group_id} - GH_Team: ${github_team_name}"
+    # echo "AZ_Group: ${group_name} - GH_ID: ${group_id} - GH_Team: ${gh_team}"
 
-    json_array=$(echo "$json_array" | jq -c --arg group_id "$group_id" --arg group_name "$group_name" --arg github_team_name "$github_team_name" \
-      '. += [{ "group_id": $group_id, "group_name": $group_name, "github_team_name": $github_team_name }]')
+    json_array=$(echo "$json_array" | jq -c --arg group_id "$group_id" --arg group_name "$group_name" --arg gh_team "$gh_team" \
+      '. += [{ "group_id": $group_id, "group_name": $group_name, "gh_team": $gh_team }]')
   else
     echo "No matching rows found for GitHub group: ${group_name}"
   fi
@@ -108,10 +122,10 @@ echo "Linking ${ORG} teams..."
 jq -c '.[]' "$GH_GROUPS_MAPPING_FILE" | while read -r group; do
   group_id=$(echo "$group" | jq -r '.group_id')
   group_name=$(echo "$group" | jq -r '.group_name')
-  github_team_name=$(echo "$group" | jq -r '.github_team_name')
+  gh_team=$(echo "$group" | jq -r '.gh_team')
 
-  echo "Linking: ${group_name} - [${github_team_name}] to (${group_id})"
-  gh gei create-team --github-org "$ORG" --team-name "$github_team_name" --idp-group "$group_name"
+  echo "Linking: ${group_name} - [${gh_team}] to (${group_id})"
+  create_team_using_gh_gei "$ORG" "$gh_team" "$group_name"
 done
 
 # bash ./link-gh-teams-by-id.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
