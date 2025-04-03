@@ -80,7 +80,7 @@ echo "$GH_GROUPS" > "$GH_EXTERNAL_GROUPS_FILE"
 json_array="[]"
 while IFS= read -r group; do
   group_id="$(echo "$group" | jq -r '.group_id')"
-  group_name=$(echo "$group" | jq -r '.group_name')
+  group_name="$(echo "$group" | jq -r '.group_name')"
 
   # Find matching rows in the exported csv_to_json file for the current GitHub group
   matching_row=$(jq -r --arg group_name "$group_name" --arg azure_column "$AZURE_GROUP_COLUMN" \
@@ -111,6 +111,6 @@ jq -c '.[]' "$GH_GROUPS_MAPPING_FILE" | while read -r group; do
   gh gei create-team --github-org "$ORG" --team-name "$github_team_name" --idp-group "$group_name"
 done
 
-# bash ./link-gh-groups.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
-# bash ./link-gh-groups.sh 'avolta-migration-sandbox-2' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
+# bash ./link-gh-groups-v1.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
+# bash ./link-gh-groups-v1.sh 'avolta-migration-sandbox-2' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
 # jq -r --arg group_name "AZG_GitHub_SSO_GH_CA_Advertisement-Promotion_AutoQA" --arg azure_column "Azure Group Actual" '.[] | select(.[$azure_column] == $group_name)' ./Github\ Azure\ mappings.json
