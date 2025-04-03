@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "WARNING: This script is deprecated and may be removed in future releases. Please use link-gh-teams.sh instead."
+echo "This script is kept here for reference purposes only, on how to combine multiple files into 1 using jq."
+
 ORG="$1"
 EXCEL_FILE="$2"
 SHEET_NAME="$3"
@@ -111,6 +114,6 @@ jq -c '.[]' "$GH_GROUPS_MAPPING_FILE" | while read -r group; do
   gh gei create-team --github-org "$ORG" --team-name "$github_team_name" --idp-group "$group_name"
 done
 
-# bash ./link-gh-groups-v1.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
-# bash ./link-gh-groups-v1.sh 'avolta-migration-sandbox-2' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
+# bash ./link-gh-teams-by-id.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
+# bash ./link-gh-teams-by-id.sh 'avolta-migration-sandbox-2' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
 # jq -r --arg group_name "AZG_GitHub_SSO_GH_CA_Advertisement-Promotion_AutoQA" --arg azure_column "Azure Group Actual" '.[] | select(.[$azure_column] == $group_name)' ./Github\ Azure\ mappings.json

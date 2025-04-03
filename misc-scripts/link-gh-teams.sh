@@ -76,4 +76,4 @@ while IFS= read -r mapping; do
   create_team_using_gh_gei "$gh_team" "$az_group"
 done < <(jq -c '.[]' "$CSV_AS_JSON_FILE")
 
-# bash ./link-gh-groups-v2.sh 'avolta-migration-sandbox-2' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
+# bash ./link-gh-teams.sh 'avolta-migration-sandbox-2' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
