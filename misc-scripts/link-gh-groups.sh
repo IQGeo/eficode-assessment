@@ -108,8 +108,9 @@ jq -c '.[]' "$GH_GROUPS_MAPPING_FILE" | while read -r group; do
   github_team_name=$(echo "$group" | jq -r '.github_team_name')
 
   echo "Linking: ${group_name} - [${github_team_name}] to (${group_id})"
-  # gh gei create-team --org "$ORG" --name "$github_team_name" --group-id "$group_id" --privacy secret
+  gh gei create-team --github-org "$ORG" --team-name "$github_team_name" --idp-group "$group_name"
 done
 
-# bash ./link-gh-groups.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual'
+# bash ./link-gh-groups.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
+# bash ./link-gh-groups.sh 'avolta-migration-sandbox-2' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
 # jq -r --arg group_name "AZG_GitHub_SSO_GH_CA_Advertisement-Promotion_AutoQA" --arg azure_column "Azure Group Actual" '.[] | select(.[$azure_column] == $group_name)' ./Github\ Azure\ mappings.json
