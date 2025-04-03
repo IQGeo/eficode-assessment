@@ -7,11 +7,8 @@ SHEET_NAME="$3"
 AZURE_GROUP_COLUMN="$4"
 GITHUB_TEAM_COLUMN="$5"
 
-# [Optional] The new column/field name this script will add
-GITHUB_GROUP_ID_COLUMN="${6:-GITHUB_GROUP_ID}"
-
 if [ -z "$ORG" ] || [ -z "$EXCEL_FILE" ] || [ -z "$SHEET_NAME" ] || [ -z "$AZURE_GROUP_COLUMN" ] || [ -z "$GITHUB_TEAM_COLUMN" ]; then
-  echo "Usage: $0 <org> <excel_file> <sheet_name> <azure_group_column> <github_team_column> [github_group_id_column]"
+  echo "Usage: $0 <org> <excel_file> <sheet_name> <azure_group_column> <github_team_column>"
   exit 1
 fi
 
@@ -91,7 +88,8 @@ while IFS= read -r group; do
 
   if [ -n "$matching_row" ]; then
     github_team_name="$(echo "$matching_row" | jq --arg github_team_column "$GITHUB_TEAM_COLUMN" '.[$github_team_column]' -r)"
-    echo "AZ_Group: ${group_name} - GH_ID: ${group_id} - GH_Team: ${github_team_name}"
+
+    # echo "AZ_Group: ${group_name} - GH_ID: ${group_id} - GH_Team: ${github_team_name}"
 
     json_array=$(echo "$json_array" | jq -c --arg group_id "$group_id" --arg group_name "$group_name" --arg github_team_name "$github_team_name" \
       '. += [{ "group_id": $group_id, "group_name": $group_name, "github_team_name": $github_team_name }]')
@@ -100,15 +98,18 @@ while IFS= read -r group; do
   fi
 done < <(jq -c '.[]' "$GH_EXTERNAL_GROUPS_FILE")
 
-echo "Saving mapped record to ${GH_GROUPS_MAPPING_FILE}..."
+echo "Saving mapped records json file to to ${GH_GROUPS_MAPPING_FILE}..."
 echo "$json_array" > "$GH_GROUPS_MAPPING_FILE"
 
-# echo "Linking groups from that JSON to ${ORG}..."
-# jq -c '.[]' "$GH_GROUPS_MAPPING_FILE" | while read -r group; do
-#   # TODO Get group_id, group_name, github_team_name
-#   # echo "Linking group: ${group_name} (${group_id}) to ${ORG}"
-#   # TODO use (gh gei create-team to link)
-# done
+echo "Linking ${ORG} teams..."
+jq -c '.[]' "$GH_GROUPS_MAPPING_FILE" | while read -r group; do
+  group_id=$(echo "$group" | jq -r '.group_id')
+  group_name=$(echo "$group" | jq -r '.group_name')
+  github_team_name=$(echo "$group" | jq -r '.github_team_name')
 
-# bash ./link-gh-groups.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
+  echo "Linking: ${group_name} - [${github_team_name}] to (${group_id})"
+  # gh gei create-team --org "$ORG" --name "$github_team_name" --group-id "$group_id" --privacy secret
+done
+
+# bash ./link-gh-groups.sh 'avolta-ag' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual'
 # jq -r --arg group_name "AZG_GitHub_SSO_GH_CA_Advertisement-Promotion_AutoQA" --arg azure_column "Azure Group Actual" '.[] | select(.[$azure_column] == $group_name)' ./Github\ Azure\ mappings.json
