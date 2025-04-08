@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Usage:
+# sh ./migrate.sh <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <production_migration_status_column>
+# Example:
+# sh ./migrate.sh dufry avolta-migration-sandbox 'Github Azure mappings.xlsx' 'CA Repositories Full' 'Repository Scope' 'Production Migration Status'
+
 # REPO_ROOT="$(git rev-parse --show-toplevel)"
 DIR="$(dirname "$(readlink -f "$0")")"
 
@@ -7,8 +12,6 @@ DIR="$(dirname "$(readlink -f "$0")")"
 
 MIGRATE_SCRIPT="$DIR/migrate.ps1"
 MIGRATE_SCRIPT_CLEANED="$DIR/migrate_cleaned.ps1"
-
-# sh ./migrate.sh dufry avolta-migration-sandbox 'Github Azure mappings.xlsx' 'CA Repositories Full' 'Repository Scope' 'Production Migration Status'
 
 SOURCE_ORG="$1"
 TARGET_ORG="$2"
