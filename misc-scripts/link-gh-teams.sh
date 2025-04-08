@@ -16,7 +16,6 @@
 # Example:
 # ./link-gh-teams.sh 'my-org' 'Github Azure mappings.xlsx' 'GitHub - Azure Mapping' 'Azure Group Actual' 'GitHub Team'
 
-
 ORG="$1"
 EXCEL_FILE="$2"
 SHEET_NAME="$3"
@@ -92,10 +91,11 @@ get_org_membership() {
 check_gh_auth_org_membership() {
   local org="$1"
   local membership
-  membership="$(get_org_membership "$ORG")"
+
+  membership="$(get_org_membership "$org")"
 
   if [ "$membership" != "active" ]; then
-    echo "Your GitHub account does not have access to the organization '${ORG}' or you are not logged in."
+    echo "Your GitHub account does not have access to the organization '${org}' or you are not logged in."
     echo "Please ensure you are logged in with 'gh auth login' and have the necessary permissions."
     echo "Or maybe you need to 'gh auth switch' to the correct account."
     exit 1
