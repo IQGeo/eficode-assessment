@@ -60,10 +60,10 @@ install_dependencies() {
   }
 }
 
-excel_sheet_to_csv() {
-  local excel="$1"
-  local sheet="$2"
-  xlsx2csv -n "$sheet" "$excel" | tail -n +2
+excel_sheet_to_csv_by_name() {
+  local excel_file="$1"
+  local sheet_name="$2"
+  xlsx2csv -n "$sheet_name" "$excel_file" | tail -n +2
 }
 
 csv_to_json() {
@@ -119,7 +119,7 @@ check_gh_auth_org_membership "$ORG"
 check_env_var "GH_PAT"
 
 echo "Export ${SHEET_NAME} sheet from ${EXCEL_FILE} file to ${CSV_FILE}..."
-excel_sheet_to_csv "${EXCEL_FILE}" "${SHEET_NAME}" > "${CSV_FILE}"
+excel_sheet_to_csv_by_name "${EXCEL_FILE}" "${SHEET_NAME}" > "${CSV_FILE}"
 
 echo "Converting exported sheet as CSV from ${CSV_FILE} to JSON here: ${CSV_AS_JSON_FILE}..."
 csv_to_json "${CSV_FILE}" > "${CSV_AS_JSON_FILE}"
