@@ -1,5 +1,45 @@
 #!/bin/bash
 
+#===================================================================================================
+# File helpers
+#===================================================================================================
+
+# Check if a file exists
+# $1 - file path
+# $2 - create file if it does not exist (optional) true/false - defaults to false
+# $3 - file content (optional) - defaults to empty
+checkFileExists() {
+	if [ -z "$1" ]; then echo "Usage: checkFileExists <file_path> [create_if_not_found] [file_content_if_not_found]"; return 1; fi
+
+	if [ ! -f "$1" ]; then
+		if [ "$2" == "true" ]; then
+			if [ -n "$3" ]; then echo "$3" > "$1"; else touch "$1"; fi
+		else
+			echo "File $1 does not exist"; return 1;
+		fi
+	fi
+}
+
+# Remove empty lines from a file
+# $1 - file path
+removeEmptyLines() {
+  if [ -z "$1" ]; then
+    echo "Usage: removeEmptyLines <file_path>"
+    return 1
+  fi
+  checkFileExists "$1" "true"
+
+  # Remove empty lines and lines with only whitespace
+  # The /pattern/N;P command is used to match the pattern and the line below it, and then print that line
+  # sed -i '/^$/N;/^\n$/d' "$1"
+
+  sed -i '' '/^[[:space:]]*$/d' "$1"
+}
+
+#===================================================================================================
+# Install dependencies
+#===================================================================================================
+
 install_brew() {
   command -v brew >/dev/null 2>&1 || {
     echo "brew not found. Installing..."
@@ -51,6 +91,10 @@ install_xlsx2csv() {
   }
 }
 
+#===================================================================================================
+# Excel helpers
+#===================================================================================================
+
 excel_sheet_to_csv_by_name() {
   local excel_file="$1"
   local sheet_name="$2"
@@ -61,11 +105,19 @@ csv_to_json() {
   python3 -c 'import csv, json, sys; print(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))' <"$1"
 }
 
+#===================================================================================================
+# JSON helpers
+#===================================================================================================
+
 get_by_key_from_json_object() {
   local json_object="$1"
   local key="$2"
   echo "$json_object" | jq --arg key "$key" '.[$key]' -r
 }
+
+#===================================================================================================
+# GitHub helpers
+#===================================================================================================
 
 check_env_var() {
   local var_name="$1"
