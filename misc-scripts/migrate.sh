@@ -43,6 +43,7 @@ read -a all_repos <<< $(repos_list_names "$SOURCE_ORG" | jq -r '.[]')
 
 # Get repos to migrate
 # jq -r '.[] | .["Repository Scope"]' "sheet.json"
+# TODO Update the following filters to be dynamic
 read -a repos_to_migrate <<< $(jq -r '.[] | select(.["'"$PRODUCTION_MIGRATION_STATUS_COLUMN"'"] == "In Progress" or .["'"$PRODUCTION_MIGRATION_STATUS_COLUMN"'"] == "Wave 1") | .["'"$REPO_NAME_COLUMN"'"]' "$DIR/sheet.json")
 # printf '%s\n' "${repos_to_migrate[@]}"
 

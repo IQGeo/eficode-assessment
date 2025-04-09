@@ -31,6 +31,8 @@ fi
 CSV_FILE="${EXCEL_FILE%.xlsx}.csv"
 CSV_AS_JSON_FILE="${EXCEL_FILE%.xlsx}.json"
 
+# TODO Use the lib.sh script here as well
+
 install_dependencies() {
   command -v brew >/dev/null 2>&1 || {
     echo "brew not found. Installing..."
