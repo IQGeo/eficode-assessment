@@ -4,3 +4,9 @@
 .act
 build.sh
 *.log
+*.xlsx
+*.csv
+*.ps1
+
+# Visual Studio folder
+.vs
