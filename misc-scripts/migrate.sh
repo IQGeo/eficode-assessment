@@ -78,4 +78,4 @@ while IFS= read -r line; do
   fi
 done <"$MIGRATE_SCRIPT"
 
-removeEmptyLines "$MIGRATE_SCRIPT_CLEANED"
+# removeEmptyLines "$MIGRATE_SCRIPT_CLEANED"
