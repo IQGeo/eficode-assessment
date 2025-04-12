@@ -6,6 +6,12 @@
 # sh ./migrate.sh dufry avolta-migration-sandbox 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status'
 # sh ./migrate.sh dufry avolta-ag 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status'
 
+# TODOs:
+# - Add an attribute to define output file
+# - Update the filters to select certain waves to be dynamic
+# - Output (total number of repos) - (number of repos to be migrated) - (number of repos to be skipped)
+# - After the script is done, open the diff of the migration scripts (original vs cleaned) in VSCode
+
 # REPO_ROOT="$(git rev-parse --show-toplevel)"
 DIR="$(dirname "$(readlink -f "$0")")"
 
@@ -44,7 +50,6 @@ read -a all_repos <<< $(repos_list_names "$SOURCE_ORG" | jq -r '.[]')
 
 # Get repos to migrate
 # jq -r '.[] | .["Repository Scope"]' "sheet.json"
-# TODO Update the following filters to be dynamic
 read -a repos_to_migrate <<< $(jq -r '.[] | select(.["'"$PRODUCTION_MIGRATION_STATUS_COLUMN"'"] == "Wave 2" or .["'"$PRODUCTION_MIGRATION_STATUS_COLUMN"'"] == "Wave 3") | .["'"$REPO_NAME_COLUMN"'"]' "$DIR/sheet.json")
 # printf '%s\n' "${repos_to_migrate[@]}"
 
