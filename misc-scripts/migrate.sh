@@ -11,14 +11,6 @@
 # sh ./migrate.sh dufry avolta-migration-sandbox 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status' 'Wave 6'
 # sh ./migrate.sh dufry avolta-ag 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status' 'Wave 6'
 
-# TODOs:
-# - [x] Update the filters to select certain waves to be dynamic
-# - [x] Output (total number of repos) - (number of repos to be migrated) - (number of repos to be skipped)
-# - [x] After the script is done, open the diff of the migration scripts (original vs cleaned) in VSCode
-# - [x] If the excel file or sheet name aren't correct or not found, then print a message and exit
-# - [x] If the columns for repo name and status aren't correct or not found, then print a message and exit
-# - [x] Add an attribute to define output file
-
 # REPO_ROOT="$(git rev-parse --show-toplevel)"
 DIR="$(dirname "$(readlink -f "$0")")"
 
@@ -109,7 +101,7 @@ echo "Number of repos to be migrated: $repos_to_migrate_count"
 echo "Number of repos to be skipped: $repos_to_skip_count"
 echo "Total number of skipped lines: $total_skipped_lines"
 
-# Open the diff of the migration scripts (original vs cleaned) in VSCode
+# Open the diff of the migration scripts (original vs filtered) in VSCode
 code --diff "$MIGRATE_SCRIPT" "$MIGRATE_SCRIPT_FILTERED"
 
 # removeEmptyLines "$MIGRATE_SCRIPT_FILTERED"
