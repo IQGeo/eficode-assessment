@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# sh ./migrate.sh <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <status_column> <status_column_filter>
+# sh ./migrate.sh <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <status_column> <status_column_filter> [<filtered_output_file>]
 #
 # gh auth switch to personal account (which is owner over the source org)
 # export GH_PAT=<personal-gh-pat>
@@ -12,20 +12,17 @@
 # sh ./migrate.sh dufry avolta-ag 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status' 'Wave 6'
 
 # TODOs:
-# - [ ] Add an attribute to define output file
 # - [x] Update the filters to select certain waves to be dynamic
 # - [x] Output (total number of repos) - (number of repos to be migrated) - (number of repos to be skipped)
 # - [x] After the script is done, open the diff of the migration scripts (original vs cleaned) in VSCode
-# - [ ] If the excel file or sheet name aren't correct or not found, then print a message and exit
-# - [ ] If the columns for repo name and production migration status aren't correct or not found, then print a message and exit
+# - [x] If the excel file or sheet name aren't correct or not found, then print a message and exit
+# - [x] If the columns for repo name and status aren't correct or not found, then print a message and exit
+# - [x] Add an attribute to define output file
 
 # REPO_ROOT="$(git rev-parse --show-toplevel)"
 DIR="$(dirname "$(readlink -f "$0")")"
 
 . "$DIR/lib.sh"
-
-MIGRATE_SCRIPT="$DIR/migrate.ps1"
-MIGRATE_SCRIPT_CLEANED="$DIR/migrate_cleaned.ps1"
 
 SOURCE_ORG="$1"
 TARGET_ORG="$2"
@@ -35,8 +32,12 @@ REPO_NAME_COLUMN="$5"
 STATUS_COLUMN="$6"
 STATUS_COLUMN_FILTER="$7"
 
-if [ "$#" -ne 7 ]; then
-  echo "Usage: $0 <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <status_column> <status_column_filter>"
+MIGRATE_SCRIPT="$DIR/migrate.ps1"
+MIGRATE_SCRIPT_FILTERED="${8:-migrate_filtered.ps1}"
+MIGRATE_SCRIPT_FILTERED="$DIR/$MIGRATE_SCRIPT_FILTERED"
+
+if [ "$#" -lt 7 ]; then
+  echo "Usage: $0 <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <status_column> <status_column_filter> [<filtered_output_file>]"
   exit 1
 fi
 
@@ -49,6 +50,9 @@ install_xlsx2csv
 # Please follow the instructions here: https://docs.github.com/en/migrations/using-github-enterprise-importer/migrating-between-github-products/managing-access-for-a-migration-between-github-products#granting-the-migrator-role-with-the-gei-extension
 # You'll need these requird scoped in your ==>(CLASSIC)<== PAT: https://docs.github.com/en/migrations/using-github-enterprise-importer/migrating-between-github-products/managing-access-for-a-migration-between-github-products#granting-the-migrator-role-with-the-gei-extension
 check_env_var "GH_PAT"
+
+if ! file_exists "$EXCEL_FILE"; then exit 1; fi
+if ! sheet_exists_in_excel_file "$EXCEL_FILE" "$SHEET_NAME"; then exit 1; fi
 
 excel_sheet_to_csv_by_name "$EXCEL_FILE" "$SHEET_NAME" >"$DIR/sheet.csv"
 csv_to_json "$DIR/sheet.csv" >"$DIR/sheet.json"
@@ -73,7 +77,7 @@ generate_migration_script "$SOURCE_ORG" "$TARGET_ORG" "$MIGRATE_SCRIPT"
 
 skip_line=0
 total_skipped_lines=0
-printf "" > "$MIGRATE_SCRIPT_CLEANED"
+printf "" > "$MIGRATE_SCRIPT_FILTERED"
 # Process the migration file line by line
 while IFS= read -r line; do
   skip_line=0
@@ -89,7 +93,7 @@ while IFS= read -r line; do
 
   if [[ $skip_line -eq 0 ]]; then
     # echo "$line"
-    echo "$line" >>"$MIGRATE_SCRIPT_CLEANED"
+    echo "$line" >>"$MIGRATE_SCRIPT_FILTERED"
   fi
 done <"$MIGRATE_SCRIPT"
 
@@ -106,6 +110,6 @@ echo "Number of repos to be skipped: $repos_to_skip_count"
 echo "Total number of skipped lines: $total_skipped_lines"
 
 # Open the diff of the migration scripts (original vs cleaned) in VSCode
-code --diff "$MIGRATE_SCRIPT" "$MIGRATE_SCRIPT_CLEANED"
+code --diff "$MIGRATE_SCRIPT" "$MIGRATE_SCRIPT_FILTERED"
 
-# removeEmptyLines "$MIGRATE_SCRIPT_CLEANED"
+# removeEmptyLines "$MIGRATE_SCRIPT_FILTERED"

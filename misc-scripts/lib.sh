@@ -8,8 +8,8 @@
 # $1 - file path
 # $2 - create file if it does not exist (optional) true/false - defaults to false
 # $3 - file content (optional) - defaults to empty
-checkFileExists() {
-	if [ -z "$1" ]; then echo "Usage: checkFileExists <file_path> [create_if_not_found] [file_content_if_not_found]"; return 1; fi
+file_exists() {
+	if [ -z "$1" ]; then echo "Usage: file_exists <file_path> [create_if_not_found] [file_content_if_not_found]"; return 1; fi
 
 	if [ ! -f "$1" ]; then
 		if [ "$2" == "true" ]; then
@@ -27,7 +27,7 @@ removeEmptyLines() {
     echo "Usage: removeEmptyLines <file_path>"
     return 1
   fi
-  checkFileExists "$1" "true"
+  file_exists "$1" "true"
 
   # Remove empty lines and lines with only whitespace
   # The /pattern/N;P command is used to match the pattern and the line below it, and then print that line
@@ -94,6 +94,25 @@ install_xlsx2csv() {
 #===================================================================================================
 # Excel helpers
 #===================================================================================================
+
+sheet_exists_in_excel_file() {
+  local excel_file="$1"
+  local sheet_name="$2"
+  if ! xlsx2csv -n "$sheet_name" "$excel_file" >/dev/null 2>&1; then
+    echo "Sheet '$sheet_name' does not exist in the Excel file '$excel_file'."
+    return 1
+  fi
+}
+
+sheet_column_exists() {
+  local excel_file="$1"
+  local sheet_name="$2"
+  local column_name="$3"
+  if ! xlsx2csv -n "$sheet_name" "$excel_file" | head -n 1 | tr ',' '\n' | grep -q "^$column_name$"; then
+    echo "Column '$column_name' does not exist in the sheet '$sheet_name' of the Excel file '$excel_file'."
+    return 1
+  fi
+}
 
 excel_sheet_to_csv_by_name() {
   local excel_file="$1"
