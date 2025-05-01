@@ -46,8 +46,8 @@ check_env_var "GH_PAT"
 if ! file_exists "$EXCEL_FILE"; then exit 1; fi
 if ! sheet_exists_in_excel_file "$EXCEL_FILE" "$SHEET_NAME"; then exit 1; fi
 
-excel_sheet_to_csv_by_name "$EXCEL_FILE" "$SHEET_NAME" >"$DIR/sheet.csv"
-csv_to_json "$DIR/sheet.csv" >"$DIR/sheet.json"
+excel_sheet_to_csv_by_name "$EXCEL_FILE" "$SHEET_NAME" "$DIR/sheet.csv"
+csv_to_json "$DIR/sheet.csv" "$DIR/sheet.json"
 
 # Get all repos names
 read -a all_repos <<< $(repos_list_names "$SOURCE_ORG" | jq -r '.[]')
@@ -104,4 +104,4 @@ echo "Total number of skipped lines: $total_skipped_lines"
 # Open the diff of the migration scripts (original vs filtered) in VSCode
 code --diff "$MIGRATE_SCRIPT" "$MIGRATE_SCRIPT_FILTERED"
 
-# removeEmptyLines "$MIGRATE_SCRIPT_FILTERED"
+# remove_empty_lines "$MIGRATE_SCRIPT_FILTERED"

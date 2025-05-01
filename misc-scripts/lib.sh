@@ -22,9 +22,9 @@ file_exists() {
 
 # Remove empty lines from a file
 # $1 - file path
-removeEmptyLines() {
+remove_empty_lines() {
   if [ -z "$1" ]; then
-    echo "Usage: removeEmptyLines <file_path>"
+    echo "Usage: remove_empty_lines <file_path>"
     return 1
   fi
   file_exists "$1" "true"
@@ -114,14 +114,66 @@ sheet_column_exists() {
   fi
 }
 
+# List all columns in a sheet
+# $1 - Excel file path
+# $2 - Sheet name
+# $3 - Columns at line number (optional) [default: 1]
+# Usage: list_excel_sheet_columns <excel_file> <sheet_name> [<line_number>]
+# If no line number is provided, the first line will be used
+list_excel_sheet_columns() {
+  local excel_file="$1"
+  local sheet_name="$2"
+  local line_number="${3:-1}"
+
+  if [ -z "$excel_file" ] || [ -z "$sheet_name" ]; then
+    echo "Usage: list_excel_sheet_columns <excel_file> <sheet_name> [<line_number>]"
+    return 1
+  fi
+  if ! sheet_exists_in_excel_file "$excel_file" "$sheet_name"; then
+    return 1
+  fi
+  # Get the columns from the specified line number
+  xlsx2csv -n "$sheet_name" "$excel_file" | sed -n "${line_number}p" | tr ',' '\n'
+  # xlsx2csv -n "$sheet_name" "$excel_file" | head -n 1 | tr ',' '\n'
+}
+
+# Convert an Excel sheet to CSV
+# $1 - Excel file path
+# $2 - Sheet name
+# $3 - Output CSV file path (optional)
+# If no output file is provided, the CSV will be printed to stdout
+# Usage: excel_sheet_to_csv_by_name <excel_file> <sheet_name> [<output_csv_file>]
 excel_sheet_to_csv_by_name() {
   local excel_file="$1"
   local sheet_name="$2"
-  xlsx2csv -n "$sheet_name" "$excel_file" | tail -n +2
+  local output_csv_file="$3"
+
+  if [ -z "$output_csv_file" ]; then
+    xlsx2csv -n "$sheet_name" "$excel_file" | tail -n +2
+  else
+    xlsx2csv -n "$sheet_name" "$excel_file" | tail -n +2 >"$output_csv_file"
+  fi
 }
 
+# Convert CSV to JSON
+# $1 - CSV file path
+# $2 - Output JSON file path (optional)
+# If no output file is provided, the JSON will be printed to stdout
+# Usage: csv_to_json <csv_file> [<json_file>]
 csv_to_json() {
-  python3 -c 'import csv, json, sys; print(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))' <"$1"
+  local csv_file="$1"
+  local json_file="$2"
+  if [ -z "$csv_file" ]; then
+    echo "Usage: csv_to_json <csv_file> [<json_file>]"
+    return 1
+  fi
+  if [ -z "$json_file" ]; then
+    # Convert CSV to JSON and print to stdout
+    python3 -c 'import csv, json, sys; print(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))' <"$csv_file"
+  else
+    # Convert CSV to JSON and save to file
+    python3 -c 'import csv, json, sys; print(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))' <"$csv_file" >"$json_file"
+  fi
 }
 
 #===================================================================================================
