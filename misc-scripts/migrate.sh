@@ -8,7 +8,7 @@
 #
 # Examples:
 #
-# sh ./migrate.sh dufry avolta-migration-sandbox 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status' 'Wave 6'
+# sh ./migrate.sh dufry avolta-migration-sandbox 'Github Azure mappings.xlsx' 'All Repositories_Active_Archive' 'repo' 'Production Migration Status' 'Dry Run - May 5th'
 # sh ./migrate.sh dufry avolta-ag 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status' 'Wave 6'
 
 # REPO_ROOT="$(git rev-parse --show-toplevel)"
@@ -95,15 +95,25 @@ done <"$MIGRATE_SCRIPT"
 total_repos="${#all_repos[@]}"
 repos_to_migrate_count="${#repos_to_migrate[@]}"
 repos_to_skip_count="${#repos_to_skip[@]}"
-printf "\n\n"
-printf "%.0s-" {1..50}
-printf "\n\n"
+print_separator
 echo "Total number of repos: $total_repos"
 echo "Number of repos to be migrated: $repos_to_migrate_count"
 echo "Number of repos to be skipped: $repos_to_skip_count"
 echo "Total number of skipped lines: $total_skipped_lines"
 
-# Open the diff of the migration scripts (original vs filtered) in VSCode
+if [[ $repos_to_migrate_count -eq 0 ]]; then
+  print_separator
+  print_warning "WARNING ==> No repositories to migrate were found. Ensure the header row in the Excel sheet is correctly identified. Verify the parameters passed to 'excel_sheet_to_csv_by_name' and adjust the header row if necessary, or manually set the header row as the first row in the sheet."
+fi
+
+# If no of repos to be skipped + no of repos to be migrated != total number of repos, then something is wrong
+if [[ $((repos_to_migrate_count + repos_to_skip_count)) -ne $total_repos ]]; then
+  print_separator
+  print_failure "ERROR ==> The number of repos to be migrated + the number of repos to be skipped does not equal the total number of repos, Please check the migration script and the repo lists."
+fi
+
+print_separator
+echo "Opening the diff of the migration scripts (original vs filtered) in VSCode..."
 code --diff "$MIGRATE_SCRIPT" "$MIGRATE_SCRIPT_FILTERED"
 
 # remove_empty_lines "$MIGRATE_SCRIPT_FILTERED"
