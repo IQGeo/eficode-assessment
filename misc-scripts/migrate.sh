@@ -46,11 +46,13 @@ check_env_var "GH_PAT"
 if ! file_exists "$EXCEL_FILE"; then exit 1; fi
 if ! sheet_exists_in_excel_file "$EXCEL_FILE" "$SHEET_NAME"; then exit 1; fi
 
-excel_sheet_to_csv_by_name "$EXCEL_FILE" "$SHEET_NAME" "$DIR/sheet.csv"
+# TODO - find a way to auto-detect the first header row (sometimes it's 1, sometimes it's 2, depending on the sheet)
+excel_sheet_to_csv_by_name "$EXCEL_FILE" "$SHEET_NAME" "$DIR/sheet.csv" 1
 csv_to_json "$DIR/sheet.csv" "$DIR/sheet.json"
 
 # Get all repos names
 read -a all_repos <<< $(repos_list_names "$SOURCE_ORG" | jq -r '.[]')
+# printf '%s\n' "${all_repos[@]}"
 
 # Get repos to migrate
 # jq -r '.[] | .["Repository Scope"]' "sheet.json"

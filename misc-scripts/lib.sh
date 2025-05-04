@@ -141,17 +141,19 @@ list_excel_sheet_columns() {
 # $1 - Excel file path
 # $2 - Sheet name
 # $3 - Output CSV file path (optional)
+# $4 - Starting line number (optional) [default: 1]
 # If no output file is provided, the CSV will be printed to stdout
-# Usage: excel_sheet_to_csv_by_name <excel_file> <sheet_name> [<output_csv_file>]
+# Usage: excel_sheet_to_csv_by_name <excel_file> <sheet_name> [<output_csv_file>] [<start_line>]
 excel_sheet_to_csv_by_name() {
   local excel_file="$1"
   local sheet_name="$2"
   local output_csv_file="$3"
+  local start_line="${4:-1}"
 
   if [ -z "$output_csv_file" ]; then
-    xlsx2csv -n "$sheet_name" "$excel_file" | tail -n +2
+    xlsx2csv -n "$sheet_name" "$excel_file" | tail -n +"$start_line"
   else
-    xlsx2csv -n "$sheet_name" "$excel_file" | tail -n +2 >"$output_csv_file"
+    xlsx2csv -n "$sheet_name" "$excel_file" | tail -n +"$start_line" >"$output_csv_file"
   fi
 }
 
