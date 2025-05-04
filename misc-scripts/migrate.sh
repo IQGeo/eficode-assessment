@@ -8,7 +8,7 @@
 #
 # Examples:
 #
-# sh ./migrate.sh dufry avolta-migration-sandbox 'Github Azure mappings.xlsx' 'All Repositories_Active_Archive' 'repo' 'Production Migration Status' 'Dry Run - May 5th'
+# sh ./migrate.sh dufry avolta-migration-sandbox-2 'Github Azure mappings.xlsx' 'All Repositories_Active_Archive' 'repo' 'Production Migration Status' 'Dry Run - May 5th'
 # sh ./migrate.sh dufry avolta-ag 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status' 'Wave 6'
 
 # REPO_ROOT="$(git rev-parse --show-toplevel)"
