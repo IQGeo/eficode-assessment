@@ -11,7 +11,7 @@ FILE="${ORG}_repos_admins.csv"
 # List all repos in the org and sort them by name
 repos=$(gh repo list "$ORG" --json name,isArchived --limit 1000 | jq 'sort_by(.name | ascii_downcase)')
 
-echo "Repository, IsArchived, Admin users, Admin teams" > "$FILE"
+echo "Repository,IsArchived,Admin users,Admin teams" > "$FILE"
 while IFS= read -r repo; do
   repo_name=$(echo "$repo" | jq -r '.name')
   is_archived=$(echo "$repo" | jq -r '.isArchived')
@@ -35,6 +35,9 @@ while IFS= read -r repo; do
   done
   # Remove the trailing comma and space
   users_list=${users_list%, }
+  if [ -n "$users_list" ]; then
+    users_list="\"$users_list\""
+  fi
 
   teams_list=""
   for team in $team_logins; do
@@ -45,8 +48,13 @@ while IFS= read -r repo; do
     # Append to the list of teams
     teams_list+="$team ($team_name), "
   done
+  # Remove the trailing comma and space
+  teams_list=${teams_list%, }
+  if [ -n "$teams_list" ]; then
+    teams_list="\"$teams_list\""
+  fi
 
   echo "🔹 Repo: $repo_name, Archived: $is_archived, Users: $users_list, Teams: $teams_list"
   # Write to the CSV file
-  echo "$repo_name, $is_archived, \"$users_list\", \"$teams_list\"" >> "$FILE"
+  echo "$repo_name,$is_archived,$users_list,$teams_list" >> "$FILE"
 done <<< "$(echo "$repos" | jq -c '.[]')"
