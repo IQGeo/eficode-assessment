@@ -2,9 +2,9 @@
 
 ROOT=$(git rev-parse --show-toplevel)
 
-#==============================================================================
+#===================================================================================================
 # Helpers
-#==============================================================================
+#===================================================================================================
 
 print_success() { printf "\xE2\x9C\x94 %s\n" "$1"; }
 print_warning() { printf "\xE2\x9D\x97 %s\n" "$1"; }
@@ -47,6 +47,14 @@ remove_empty_lines() {
 
   sed -i '' '/^[[:space:]]*$/d' "$1"
 }
+
+#===================================================================================================
+# String helpers
+#===================================================================================================
+
+# Quote a string if it is not empty
+# $1 - string to format
+quote_if_not_empty() { if [ -n "$1" ]; then echo "\"$1\""; else echo ""; fi; }
 
 #===================================================================================================
 # Install dependencies
@@ -231,28 +239,10 @@ check_gh_auth_org_membership() {
   fi
 }
 
-repos_list_names() {
-  if [ -z "$1" ]; then
-    echo "Usage: $0 <org> [limit:1000]"
-    return 1
-  fi
-  local limit=${2:-1000}
-  gh repo list "$1" --json name --limit "$limit" | jq -r 'sort_by(.name | ascii_downcase) | [.[].name]'
-}
 api_repos_list() {
-  if [ -z "$1" ]; then
-    echo "Usage: $0 <org>"
-    return 1
-  fi
-  local response
-  response=$(gh api "/orgs/${1}/repos" --paginate --slurp)
-  echo "$response"
+  gh api "/orgs/${1}/repos" --paginate --slurp
 }
 api_repos_list_names() {
-  if [ -z "$1" ]; then
-    echo "Usage: $0 <org>"
-    return 1
-  fi
   api_repos_list "$1" | jq -r '[.[] | .[].name]'
 }
 
@@ -285,18 +275,25 @@ generate_migration_script() {
 
 # Get all repositories from an organization sorted alphabetically
 # $1 - organization name
-# $2 - limit (optional, default: 1000)
-# Returns: JSON array of repositories with name and isArchived fields
-get_org_repos() {
+# $2 - include archived (optional, default: false)
+# $3 - limit (optional, default: 1000)
+# Returns: JSON array of repositories with name and isArchived fields if $2 is true
+gh_repos_list() {
   local org="$1"
-  local limit="${2:-1000}"
+  local include_archived="${2:-false}"
+  local limit="${3:-1000}"
 
   if [ -z "$org" ]; then
-    echo "Usage: get_org_repos <org> [limit]"
+    echo "Usage: gh_repos_list <org> [include archived: true|false (default: false)] [limit (default: 1000)]"
     return 1
   fi
 
-  gh repo list "$org" --json name,isArchived --limit "$limit" | jq 'sort_by(.name | ascii_downcase)'
+  json_params="name"
+  if [ "$2" = "true" ]; then
+    json_params+=",isArchived"
+  fi
+
+  gh repo list "$org" --json "$json_params" --limit "$limit" | jq 'sort_by(.name | ascii_downcase)'
 }
 
 # Get admin users for a repository
@@ -381,19 +378,6 @@ get_repo_admin_teams() {
   echo "$teams_list"
 }
 
-# Format a list for CSV output
-# $1 - string to format
-# Returns: quoted string if not empty
-format_csv_list() {
-  local list="$1"
-
-  if [ -n "$list" ]; then
-    echo "\"$list\""
-  else
-    echo ""
-  fi
-}
-
 # Generate a CSV report of repository admins
 # $1 - organization name
 # $2 - include full name (optional, default: false)
@@ -408,35 +392,30 @@ generate_repo_admins_report() {
     return 1
   fi
 
+  check_gh_auth_org_membership "$ORG"
+
   # Get all repos in the org
   local repos
-  repos=$(get_org_repos "$org")
+  repos=$(gh_repos_list "$org" "true")
 
   echo "Repository,IsArchived,Admin users,Admin teams" > "$output_file"
 
   while IFS= read -r repo; do
-    local repo_name
-    repo_name=$(echo "$repo" | jq -r '.name')
+    local repo_name is_archived users_list teams_list
 
-    local is_archived
+    repo_name=$(echo "$repo" | jq -r '.name')
     is_archived=$(echo "$repo" | jq -r '.isArchived')
 
     # Get admin users
-    local users_list
-    users_list=$(get_repo_admin_users "$org" "$repo_name" "$include_full_name")
-    local formatted_users
-    formatted_users=$(format_csv_list "$users_list")
+    users_list=$(quote_if_not_empty "$(get_repo_admin_users "$org" "$repo_name" "$include_full_name")")
 
     # Get admin teams
-    local teams_list
-    teams_list=$(get_repo_admin_teams "$org" "$repo_name" "$include_full_name")
-    local formatted_teams
-    formatted_teams=$(format_csv_list "$teams_list")
+    teams_list=$(quote_if_not_empty "$(get_repo_admin_teams "$org" "$repo_name" "$include_full_name")")
 
-    echo "🔹 Repo: $repo_name, Archived: $is_archived, Users: $formatted_users, Teams: $formatted_teams"
+    echo "🔹 Repo: $repo_name, Archived: $is_archived, Users: $users_list, Teams: $teams_list"
 
     # Write to the CSV file
-    echo "$repo_name,$is_archived,$formatted_users,$formatted_teams" >> "$output_file"
+    echo "$repo_name,$is_archived,$users_list,$teams_list" >> "$output_file"
   done <<< "$(echo "$repos" | jq -c '.[]')"
 
   echo "Report generated: $output_file"

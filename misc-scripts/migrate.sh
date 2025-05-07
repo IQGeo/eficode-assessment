@@ -51,7 +51,7 @@ excel_sheet_to_csv_by_name "$EXCEL_FILE" "$SHEET_NAME" "$DIR/sheet.csv" 1
 csv_to_json "$DIR/sheet.csv" "$DIR/sheet.json"
 
 # Get all repos names
-read -a all_repos <<< $(repos_list_names "$SOURCE_ORG" | jq -r '.[]')
+read -a all_repos <<< $(gh_repos_list "$SOURCE_ORG" | jq -r '.[].name')
 # printf '%s\n' "${all_repos[@]}"
 
 # Get repos to migrate
@@ -109,7 +109,7 @@ fi
 # If no of repos to be skipped + no of repos to be migrated != total number of repos, then something is wrong
 if [[ $((repos_to_migrate_count + repos_to_skip_count)) -ne $total_repos ]]; then
   print_separator
-  print_failure "ERROR ==> The number of repos to be migrated + the number of repos to be skipped does not equal the total number of repos, Please check the migration script and the repo lists."
+  print_error "ERROR ==> The number of repos to be migrated + the number of repos to be skipped does not equal the total number of repos, Please check the migration script and the repo lists."
 fi
 
 print_separator
