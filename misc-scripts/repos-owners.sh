@@ -26,9 +26,9 @@ while IFS= read -r repo; do
 
   users_list=""
   for login in $logins; do
-    # Fetch user's public name
-    user_info=$(gh api "/users/$login")
-    user_name=$(echo "$user_info" | jq -r '.name // "N/A"')
+    # Fetch user's public name and sanitize output
+    user_info=$(gh api "/users/$login" | tr -d '\000-\037')
+    user_name=$(echo "$user_info" | jq -r '.name // "N/A"' 2>/dev/null || echo "N/A")
 
     # Append to the list of admins
     users_list+="$login ($user_name), "
@@ -41,9 +41,9 @@ while IFS= read -r repo; do
 
   teams_list=""
   for team in $team_logins; do
-    # Fetch team's public name
-    team_info=$(gh api "/orgs/$ORG/teams/$team")
-    team_name=$(echo "$team_info" | jq -r '.name // "N/A"')
+    # Fetch team's public name and sanitize output
+    team_info=$(gh api "/orgs/$ORG/teams/$team" | tr -d '\000-\037')
+    team_name=$(echo "$team_info" | jq -r '.name // "N/A"' 2>/dev/null || echo "N/A")
 
     # Append to the list of teams
     teams_list+="$team ($team_name), "
