@@ -392,11 +392,11 @@ get_repo_admin_teams() {
 # Generate a CSV report of repository admins
 # $1 - organization name
 # $2 - include full name (optional, default: false)
-# $3 - output file name (optional, default: <org>_repos_admins.csv)
+# $3 - output file name (optional, default: <org>_repos_admins_<timestamp>.csv)
 generate_repo_admins_report() {
   local org="$1"
   local include_full_name="${2:-false}"
-  local output_file="${3:-${org}_repos_admins.csv}"
+  local output_file="${3:-${org}_repos_admins_$(get_timestamp).csv}"
 
   if [ -z "$org" ]; then
     echo "Usage: generate_repo_admins_report <org> [include_full_name] [output_file]"
