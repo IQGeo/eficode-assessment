@@ -1,11 +1,13 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-  echo "Usage: $0 <ORG>"
+  echo "Usage: $0 <ORG> [INCLUDE_FULL_NAME: true|false (default: false)]"
   exit 1
 fi
 
 ORG="$1"
+INCLUDE_FULL_NAME=${2:-false}
+
 FILE="${ORG}_repos_admins.csv"
 
 # List all repos in the org and sort them by name
@@ -19,19 +21,17 @@ while IFS= read -r repo; do
   # Get Direct collaborators with admin access
   logins=$(gh api "/repos/$ORG/$repo_name/collaborators?affiliation=direct&per_page=100" \
     --jq '.[] | select(.permissions.admin == true) | .login')
-
-  # Get teams with admin access
-  team_logins=$(gh api "/repos/$ORG/$repo_name/teams?per_page=100" \
-    --jq '.[] | select(.permission == "admin") | .slug')
-
   users_list=""
   for login in $logins; do
-    # Fetch user's public name and sanitize output
-    user_info=$(gh api "/users/$login" | tr -d '\000-\037')
-    user_name=$(echo "$user_info" | jq -r '.name // "N/A"' 2>/dev/null || echo "N/A")
+    if [ "$INCLUDE_FULL_NAME" = "true" ]; then
+      # Fetch user's full name and sanitize output
+      user_info=$(gh api "/users/$login" | tr -d '\000-\037')
+      user_name=$(echo "$user_info" | jq -r '.name // "N/A"' 2>/dev/null || echo "N/A")
 
-    # Append to the list of admins
-    users_list+="$login ($user_name), "
+      users_list+="$login ($user_name), "
+    else
+      users_list+="$login, "
+    fi
   done
   # Remove the trailing comma and space
   users_list=${users_list%, }
@@ -39,14 +39,20 @@ while IFS= read -r repo; do
     users_list="\"$users_list\""
   fi
 
+  # Get teams with admin access
+  team_logins=$(gh api "/repos/$ORG/$repo_name/teams?per_page=100" \
+    --jq '.[] | select(.permission == "admin") | .slug')
   teams_list=""
   for team in $team_logins; do
-    # Fetch team's public name and sanitize output
-    team_info=$(gh api "/orgs/$ORG/teams/$team" | tr -d '\000-\037')
-    team_name=$(echo "$team_info" | jq -r '.name // "N/A"' 2>/dev/null || echo "N/A")
+    if [ "$INCLUDE_FULL_NAME" = "true" ]; then
+      # Fetch team's full name and sanitize output
+      team_info=$(gh api "/orgs/$ORG/teams/$team" | tr -d '\000-\037')
+      team_name=$(echo "$team_info" | jq -r '.name // "N/A"' 2>/dev/null || echo "N/A")
 
-    # Append to the list of teams
-    teams_list+="$team ($team_name), "
+      teams_list+="$team ($team_name), "
+    else
+      teams_list+="$team, "
+    fi
   done
   # Remove the trailing comma and space
   teams_list=${teams_list%, }
