@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Usage:
-# sh ./migrate.sh <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <status_column> <status_column_filter> [<filtered_output_file>]
+# sh ./migrate.sh <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <status_column> <status_column_filter> [<header_row_number>:1] [<filtered_output_file>:migrate_filtered.ps1]"
 #
 # gh auth switch to personal account (which is owner over the source org)
 # export GH_PAT=<personal-gh-pat>
 #
 # Examples:
 #
-# sh ./migrate.sh dufry avolta-migration-sandbox-2 'Github Azure mappings.xlsx' 'All Repositories_Active_Archive' 'repo' 'Production Migration Status' 'Dry Run - May 5th'
-# sh ./migrate.sh dufry avolta-ag 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status' 'Wave 6'
+# sh ./migrate.sh dufry avolta-migration-sandbox-2 'Github Azure mappings.xlsx' 'All Repositories_Active_Archive' 'repo' 'Production Migration Status' 'Dry Run - May 5th' 1
+# sh ./migrate.sh dufry avolta-ag 'Github Azure mappings.xlsx' 'CA Repos Full_Migration Plan' 'Repository Scope' 'Production Migration Status' 'Wave 7' 2
 
 # REPO_ROOT="$(git rev-parse --show-toplevel)"
 DIR="$(dirname "$(readlink -f "$0")")"
@@ -24,12 +24,16 @@ REPO_NAME_COLUMN="$5"
 STATUS_COLUMN="$6"
 STATUS_COLUMN_FILTER="$7"
 
+# Optional parameters
+
+HEADER_ROW_NUMBER="${8:-1}"
+
 MIGRATE_SCRIPT="$DIR/migrate.ps1"
-MIGRATE_SCRIPT_FILTERED="${8:-migrate_filtered.ps1}"
+MIGRATE_SCRIPT_FILTERED="${9:-migrate_filtered.ps1}"
 MIGRATE_SCRIPT_FILTERED="$DIR/$MIGRATE_SCRIPT_FILTERED"
 
 if [ "$#" -lt 7 ]; then
-  echo "Usage: $0 <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <status_column> <status_column_filter> [<filtered_output_file>]"
+  echo "Usage: $0 <source_org> <target_org> <excel_file> <sheet_name> <repo_name_column> <status_column> <status_column_filter> [<header_row_number>:1] [<filtered_output_file>:migrate_filtered.ps1]"
   exit 1
 fi
 
@@ -47,16 +51,16 @@ if ! file_exists "$EXCEL_FILE"; then exit 1; fi
 if ! sheet_exists_in_excel_file "$EXCEL_FILE" "$SHEET_NAME"; then exit 1; fi
 
 # TODO - find a way to auto-detect the first header row (sometimes it's 1, sometimes it's 2, depending on the sheet)
-excel_sheet_to_csv_by_name "$EXCEL_FILE" "$SHEET_NAME" "$DIR/sheet.csv" 1
+excel_sheet_to_csv_by_name "$EXCEL_FILE" "$SHEET_NAME" "$DIR/sheet.csv" "$HEADER_ROW_NUMBER"
 csv_to_json "$DIR/sheet.csv" "$DIR/sheet.json"
 
 # Get all repos names
-read -a all_repos <<< $(gh_repos_list "$SOURCE_ORG" | jq -r '.[].name')
+read -a all_repos <<<$(gh_repos_list "$SOURCE_ORG" | jq -r '.[].name')
 # printf '%s\n' "${all_repos[@]}"
 
 # Get repos to migrate
 # jq -r '.[] | .["Repository Scope"]' "sheet.json"
-read -a repos_to_migrate <<< $(jq -r '.[] | select(.["'"$STATUS_COLUMN"'"] == "'"$STATUS_COLUMN_FILTER"'") | .["'"$REPO_NAME_COLUMN"'"]' "$DIR/sheet.json")
+read -a repos_to_migrate <<<$(jq -r '.[] | select(.["'"$STATUS_COLUMN"'"] == "'"$STATUS_COLUMN_FILTER"'") | .["'"$REPO_NAME_COLUMN"'"]' "$DIR/sheet.json")
 # printf '%s\n' "${repos_to_migrate[@]}"
 
 repos_to_skip=()
@@ -71,7 +75,7 @@ generate_migration_script "$SOURCE_ORG" "$TARGET_ORG" "$MIGRATE_SCRIPT"
 
 skip_line=0
 total_skipped_lines=0
-printf "" > "$MIGRATE_SCRIPT_FILTERED"
+printf "" >"$MIGRATE_SCRIPT_FILTERED"
 # Process the migration file line by line
 while IFS= read -r line; do
   skip_line=0
