@@ -1,0 +1,38 @@
+name: GitHub Actions Usage Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: "Organization name"
+        required: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@8e1ba3bf1619726336414f1014e37f17fbadf1db
+        with:
+          application_id: ${{ secrets.APPLICATION_ID }}
+          application_private_key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
+          organization: ${{ github.event.inputs.org }}
+
+      - name: Run Actions Usage Audit
+        uses: ./actions-usage
+        with:
+          org: ${{ github.event.inputs.org }}
+        env:
+          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: actions-usage-report
+          path: reports/
+          retention-days: 30
