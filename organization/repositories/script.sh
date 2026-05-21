@@ -27,6 +27,12 @@ gh api graphql --paginate \
         lfsconfig: object(expression: "HEAD:.lfsconfig") {
           __typename
         }
+        languages(first: 10) {
+          edges {
+            node { name }
+            size
+          }
+        }
       }
       pageInfo {
         hasNextPage
@@ -40,4 +46,5 @@ gh api graphql --paginate \
   }
 }' \
   --jq '.data.organization.repositories.nodes[]' \
+  | jq '.languages = [(.languages // {}).edges // [] | .[] | {name: .node.name, size: .size}]' \
   | jq -sc > ../../reports/repos.json
