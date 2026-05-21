@@ -78,6 +78,8 @@ jobs:
           #   auth: githubapp
           - action: repository/actions-history
             auth: githubapp
+          - action: repository/actions-usage
+            auth: githubapp
           - action: repository/branch-protection-rules
             auth: githubapp
           - action: repository/discussions

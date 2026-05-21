@@ -1,0 +1,17 @@
+name: 'GitHub Actions Usage Audit'
+description: 'Collects Actions usage metrics (workflows, runs, duration, artifacts, cache, runners) for all repositories in an organization'
+
+inputs:
+  org:
+    description: 'Organization name'
+    required: true
+  repos_file:
+    description: 'Path to repos JSON file'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./script.sh ${{ inputs.org }} ${{ inputs.repos_file }}
+      shell: bash
+      working-directory: ./repository/actions-usage
