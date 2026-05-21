@@ -40,7 +40,8 @@ for REPO in $REPOS; do
       }
     }
   }' \
-    --jq '.data.repository | .languages = [.languages.edges[] | {name: .node.name, size: .size}]' |
+    --jq '.data.repository' |
+    jq '.languages = [(.languages.edges // [])[] | {name: .node.name, size: .size}]' |
     jq -s '.')
   echo "$REPOSITORIES" >repo.json
   cp $DEST tmp.json
